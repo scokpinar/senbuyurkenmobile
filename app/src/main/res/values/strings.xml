@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Sen Büyürken</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+
+    <!-- Strings related to RegisterActivity -->
+    <string name="register_header">Yeni Hesap</string>
+    <string name="radio_male">Erkek</string>
+    <string name="radio_female">Kız</string>
+    <string name="name">Bebeğiniz Adı</string>
+    <string name="surname">Bebeğiniz Soyadı</string>
+    <string name="birthDate">Doğum Tarihi</string>
+    <string name="eMail">E-Mail Adresi</string>
+    <string name="password">Şifre (6 ve üzeri karakter)</string>
+    <string name="password2">Şifre Tekrar</string>
+    <string name="saveButton">Kaydet</string>
+    <string name="register_success_msg">Kaydınız başarıyla yapılmıştır.</string>
+    <string name="register_existinguser_msg">Kullanıcı sistemde kayıtlıdır.</string>
+
+    <!-- Strings related to login -->
+    <string name="title_activity_login">Giriş</string>
+    <string name="prompt_email">Email Adresi</string>
+    <string name="prompt_password">Şifre</string>
+    <string name="action_sign_in">Giriş</string>
+    <string name="action_sign_in_short">Giriş</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="new_registration">Yeni Hesap</string>
+    <string name="forget_pass">Şifremi Unuttum</string>
+    <string name="show_pass">Şifreyi Göster</string>
+    <string name="title_activity_launcher">Sen Büyürken</string>
+    <string name="title_activity_diary_entry">DiaryEntryActivity</string>
+    <string name="diary_enty_new_entry">Yeni No</string>
+    <string name="diary_enty_text">Notlarınızı girebilirsiniz...</string>
+    diary_enty_text
+    <string name="title_activity_diary_page">DiaryPage</string>
+
+</resources>

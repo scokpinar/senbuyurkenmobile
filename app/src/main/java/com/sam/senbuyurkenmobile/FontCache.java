@@ -1,4 +1,4 @@
-package com.sam.senbuyurkenapp;
+package com.sam.senbuyurkenmobile;
 
 import android.content.Context;
 import android.graphics.Typeface;

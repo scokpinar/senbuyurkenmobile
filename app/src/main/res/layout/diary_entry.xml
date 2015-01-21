@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:showDividers="end">
+
+    <com.sam.senbuyurkenmobile.MyTextView
+        android:id="@+id/diary_entry_date"
+        style="@style/myTextView"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="#b5bccacc"
+        android:gravity="end"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textStyle="italic" />
+
+    <ImageView
+        android:id="@+id/diary_entry_image"
+        style="@style/myImageView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:contentDescription="img" />
+
+    <com.sam.senbuyurkenmobile.MyTextView
+        android:id="@+id/diary_entry_content"
+        style="@style/myTextView"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+</LinearLayout>
