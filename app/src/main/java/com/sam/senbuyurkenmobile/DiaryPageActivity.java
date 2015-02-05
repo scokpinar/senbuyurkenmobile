@@ -2,6 +2,8 @@ package com.sam.senbuyurkenmobile;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -17,10 +19,12 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,7 +39,6 @@ public class DiaryPageActivity extends Activity {
 
     public static final String base = "https://s3-eu-west-1.amazonaws.com/senbuyurken-photos/";
     private ListView de_list_view;
-    private List<DiaryEntryWrapper> de_list = new ArrayList<DiaryEntryWrapper>();
     private ProgressBar progressBar;
 
     @Override
@@ -93,26 +96,8 @@ public class DiaryPageActivity extends Activity {
 
         @Override
         protected void onPreExecute() {
-            boolean result = false;
-
             progressBar = (ProgressBar) findViewById(R.id.progressBar);
             progressBar.setVisibility(View.VISIBLE);
-
-            Uri.Builder builder = Uri.parse("http://92.45.212.179/senbuyurken/rest/diaryEntryRest/checkDERService/").buildUpon();
-            HttpPost httpPost = new HttpPost(builder.toString());
-            HttpClient client = new DefaultHttpClient();
-            while (!result) {
-                try {
-                    HttpResponse response = client.execute(httpPost);
-                    JSONObject obj = new JSONObject(EntityUtils.toString(response.getEntity()));
-                    result = obj.getBoolean("result");
-                    System.out.println("result = " + result);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
         }
 
         @Override
@@ -124,25 +109,29 @@ public class DiaryPageActivity extends Activity {
         }
 
         protected List<DiaryEntryWrapper> doInBackground(String... urls) {
+
+            SharedPreferences sp = DiaryPageActivity.this.getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
+
             // Instantiate Http Request Param List
-            List<String> params = new ArrayList<String>();
-            params.add("1");
+            List<NameValuePair> params = new ArrayList<NameValuePair>();
+            params.add(new BasicNameValuePair("un", sp.getString("username", null)));
+            params.add(new BasicNameValuePair("t", sp.getString("token", null)));
             // Invoke RESTFull Web Service with Http parameters
             invokeRestWS(params);
             return list;
         }
 
-        public void invokeRestWS(List<String> params) {
-            Uri.Builder builder = Uri.parse("http://92.45.212.179/senbuyurken/rest/diaryEntryRest/listDiaryEntry/").buildUpon();
+        public void invokeRestWS(List<NameValuePair> params) {
 
-            for (String param : params) {
-                builder.appendPath(param + "");
-            }
+            Uri.Builder builder = Uri.parse("http://82.222.86.241/senbuyurken/rest/diaryEntryRest/listDiaryEntry/").buildUpon();
 
-            HttpGet httpGet = new HttpGet(builder.toString());
+            HttpPost httpPost = new HttpPost(builder.toString());
             HttpClient client = new DefaultHttpClient();
+
             try {
-                HttpResponse response = client.execute(httpGet);
+                httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+                HttpResponse response = client.execute(httpPost);
+
                 JSONObject obj = new JSONObject(EntityUtils.toString(response.getEntity()));
                 JSONArray arr = obj.getJSONArray("diaryEntry");
                 for (int i = 0; i < arr.length(); i++) {

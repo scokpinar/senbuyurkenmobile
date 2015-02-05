@@ -212,7 +212,7 @@ public class DiaryEntryActivity extends Activity {
         httpClient.setResponseTimeout(30 * 1000);
         httpClient.addHeader("Connection", "Keep-Alive");
 
-        httpClient.post("http://151.250.183.107/senbuyurken/rest/diaryEntryRest/createDiaryEntry", params, new AsyncHttpResponseHandler() {
+        httpClient.post("http://195.142.148.22/senbuyurken/rest/diaryEntryRest/createDiaryEntry", params, new AsyncHttpResponseHandler() {
             // When the response returned by REST has Http response code '200'
 
             @Override
