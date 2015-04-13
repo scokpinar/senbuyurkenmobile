@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="android:Theme.Holo.Light.DarkActionBar">
+    <style name="AppTheme" parent="android:Theme.Holo.Light">
         <!-- Customize your theme here. -->
     </style>
 
@@ -15,6 +15,7 @@
 
     <style name="myTextView" parent="@android:style/Widget.TextView">
         <item name="com.sam.senbuyurkenmobile:font">fonts/monotype-corsiva.ttf</item>
+        <item name="android:layout_marginEnd">7dp</item>
     </style>
 
 </resources>

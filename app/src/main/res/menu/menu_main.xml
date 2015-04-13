@@ -1,0 +1,9 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_diary_entry"
+        android:icon="@drawable/ic_pencil"
+        android:title="@string/diary_enty_new_entry"
+        app:showAsAction="always" />
+</menu>

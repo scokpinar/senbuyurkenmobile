@@ -7,17 +7,41 @@
 
     <!-- Strings related to RegisterActivity -->
     <string name="register_header">Yeni Hesap</string>
-    <string name="radio_male">Erkek</string>
-    <string name="radio_female">Kız</string>
-    <string name="name">Bebeğiniz Adı</string>
-    <string name="surname">Bebeğiniz Soyadı</string>
-    <string name="birthDate">Doğum Tarihi</string>
+
     <string name="eMail">E-Mail Adresi</string>
     <string name="password">Şifre (6 ve üzeri karakter)</string>
     <string name="password2">Şifre Tekrar</string>
     <string name="saveButton">Kaydet</string>
     <string name="register_success_msg">Kaydınız başarıyla yapılmıştır.</string>
     <string name="register_existinguser_msg">Kullanıcı sistemde kayıtlıdır.</string>
+
+
+    <!-- Diary Page -->
+
+    <string name="dp_empty_msg">Bebeğinizin unutulmaz anlarını kaçırmayın...Hemen hatıralarınızı kaydetmeye başlayın...</string>
+
+
+    <!-- Baby Info Page -->
+    <string name="radio_male">Erkek</string>
+    <string name="radio_female">Kız</string>
+    <string name="baby_name">ADI</string>
+    <string name="baby_surname">SOYADI</string>
+    <string name="birthDate">DOĞUM TARİHİ</string>
+    <string name="birthHour">DOĞUM SAATİ</string>
+    <string name="birthWeight">DOĞUM KİLOSU (gr)</string>
+    <string name="birthLength">DOĞUM BOYU (cm)</string>
+    <string name="birthPlace">DOĞUM YERİ</string>
+    <string name="hospital">HASTANE</string>
+    <string name="gynecologyDoctor">DOĞUM DOKTORU</string>
+    <string name="pediatricianDoctor">ÇOCUK DOKTORU</string>
+
+
+    <!-- Parent Info Page -->
+    <string name="mother_name">ANNE ADI</string>
+    <string name="mother_surname">ANNE SOYADI</string>
+    <string name="father_name">BABA ADI</string>
+    <string name="father_surname">BABA SOYADI</string>
+    <string name="wedding_anniversary">EVLİLİK YILDÖNÜMÜ</string>
 
     <!-- Strings related to login -->
     <string name="title_activity_login">Giriş</string>
@@ -35,10 +59,32 @@
     <string name="forget_pass">Şifremi Unuttum</string>
     <string name="show_pass">Şifreyi Göster</string>
     <string name="title_activity_launcher">Sen Büyürken</string>
-    <string name="title_activity_diary_entry">DiaryEntryActivity</string>
-    <string name="diary_enty_new_entry">Yeni No</string>
+    <string name="title_activity_diary_entry">Yeni Not</string>
+    <string name="diary_enty_new_entry">Yeni Not</string>
     <string name="diary_enty_text">Notlarınızı girebilirsiniz...</string>
-    diary_enty_text
-    <string name="title_activity_diary_page">DiaryPage</string>
+    <string name="title_activity_diary_page">Notlarım</string>
+    <string name="title_activity_main">MainActivity</string>
+
+    <string name="title_activity_baby_parent_info">Profil</string>
+    <string name="title_activity_app_info">Hakkında</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_example">Example action</string>
+
+
+    <string-array name="menu">
+        <item>Notlarım</item>
+        <item>Bebek Bilgileri</item>
+        <item>Ebeveyn Bilgileri</item>
+        <item>Hakkında</item>
+    </string-array>
+
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+    <string name="action_websearch">Web search</string>
+    <string name="app_not_available">Sorry, there\'s no web browser available</string>
+
 
 </resources>

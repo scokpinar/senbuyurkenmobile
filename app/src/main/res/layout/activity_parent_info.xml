@@ -1,0 +1,211 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:theme="@android:style/Theme.Light"
+    tools:context="com.sam.senbuyurkenmobile.ParentInfoActivity">
+
+    <ScrollView
+        android:id="@+id/parent_info_form"
+        android:layout_width="fill_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentEnd="false"
+        android:layout_centerHorizontal="true"
+        android:fillViewport="false"
+        android:padding="20dp">
+
+        <TableLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:orientation="vertical"
+            android:showDividers="none">
+
+            <TableRow
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+
+                <ImageButton
+                    android:id="@+id/mother_photo"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_camera" />
+
+                <TableLayout android:paddingLeft="20dp">
+
+                    <TableRow>
+
+                        <TextView
+                            android:id="@+id/textView3"
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_span="1"
+                            android:text="@string/mother_name"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Small" />
+
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent"
+                        android:gravity="fill_horizontal">
+
+                        <EditText
+                            android:id="@+id/mother_name"
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_column="0"
+                            android:layout_weight="1"
+                            android:width="200dp"
+                            android:gravity="fill_horizontal"
+                            android:inputType="textPersonName" />
+                    </TableRow>
+
+                    <TableRow>
+
+                        <TextView
+                            android:id="@+id/textView2"
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/mother_surname"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Small" />
+
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
+
+                        <EditText
+                            android:id="@+id/mother_surname"
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:width="200dp"
+                            android:inputType="textPersonName" />
+                    </TableRow>
+
+                </TableLayout>
+
+            </TableRow>
+
+
+            <TableRow
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+
+                <ImageButton
+                    android:id="@+id/father_photo"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_camera" />
+
+                <TableLayout android:paddingLeft="20dp">
+
+                    <TableRow>
+
+                        <TextView
+                            android:id="@+id/textView33"
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/father_name"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Small" />
+
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
+
+                        <EditText
+                            android:id="@+id/father_name"
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:width="200dp"
+                            android:inputType="textPersonName" />
+                    </TableRow>
+
+                    <TableRow>
+
+                        <TextView
+                            android:id="@+id/textView22"
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/father_surname"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Small" />
+
+                    </TableRow>
+
+                    <TableRow
+                        android:layout_width="fill_parent"
+                        android:layout_height="fill_parent">
+
+                        <EditText
+                            android:id="@+id/father_surname"
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:width="200dp"
+                            android:inputType="textPersonName" />
+                    </TableRow>
+
+                </TableLayout>
+
+            </TableRow>
+
+
+            <TableRow
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:paddingTop="20dp">
+
+                <TableLayout android:layout_span="2">
+
+                    <TextView
+                        android:id="@+id/textView222"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/wedding_anniversary"
+                        android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Small" />
+
+                    <EditText
+                        android:id="@+id/wedding_anniversary"
+                        android:layout_width="369dp"
+                        android:layout_height="fill_parent"
+                        android:layout_gravity="center_horizontal"
+                        android:width="200dp"
+                        android:inputType="textPersonName" />
+                </TableLayout>
+
+            </TableRow>
+
+
+            <TableRow
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="center_horizontal"
+                android:paddingTop="40dp">
+
+                <Button
+                    android:id="@+id/parentInfoSaveButton"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:text="@string/saveButton" />
+            </TableRow>
+
+        </TableLayout>
+
+    </ScrollView>
+
+
+</RelativeLayout>

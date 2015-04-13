@@ -10,12 +10,15 @@ import java.util.regex.Pattern;
  */
 public class AppUtility {
 
+    public static final String APP_URL = "https://afternoon-citadel-9635.herokuapp.com/";
     //Email Pattern
     private static final String EMAIL_PATTERN =
             "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
                     + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
     private static Pattern pattern;
     private static Matcher matcher;
+    //public static final String APP_URL = "http://ws.senbuyurken.com/";
+    //public static final String APP_URL = "http://213.153.159.104/senbuyurken/";
 
     /**
      * Validate Email with regular expression

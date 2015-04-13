@@ -7,23 +7,19 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.SyncHttpClient;
 
 import org.apache.http.Header;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-
 public class LauncherActivity extends Activity {
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launcher);
-
-        invokeWS();
 
         /****** Create Thread that will sleep for 3 seconds *************/
         Thread background = new Thread() {
@@ -34,14 +30,12 @@ public class LauncherActivity extends Activity {
                     sleep(3 * 1000);
 
                     // After 3 seconds redirect to another intent
-                    Intent i = new Intent(getBaseContext(), LoginActivity.class);
-                    startActivity(i);
+                    invokeWS();
 
                     //Remove activity
                     finish();
 
                 } catch (Exception e) {
-
                 }
             }
         };
@@ -53,7 +47,7 @@ public class LauncherActivity extends Activity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_launcher, menu);
+        //getMenuInflater().inflate(R.menu.menu_launcher, menu);
         return true;
     }
 
@@ -74,39 +68,31 @@ public class LauncherActivity extends Activity {
 
     public void invokeWS() {
         // Make RESTful webservice call using AsyncHttpClient object
-        AsyncHttpClient client = new AsyncHttpClient();
-        client.post("https://afternoon-citadel-9635.herokuapp.com/rest/userRegistrationRest/checkURRService", new AsyncHttpResponseHandler() {
-            // When the response returned by REST has Http response code '200'
+        SyncHttpClient client = new SyncHttpClient();
+
+
+        client.get(AppUtility.APP_URL + "rest/userRegistrationRest/checkURRService", new JsonHttpResponseHandler() {
 
             @Override
-            public void onSuccess(int statusCode, Header[] headers, byte[] response) {
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
 
                 try {
-                    // JSON Object
-                    JSONObject obj = new JSONObject(new String(response));
+                    JSONObject obj = response;
                     // When the JSON response has status boolean value assigned with true
                     if (obj.getBoolean("result")) {
-                        Toast.makeText(getApplicationContext(), getApplicationContext().getString(R.string.register_success_msg), Toast.LENGTH_LONG).show();
-                        // Navigate to Home screen
-                        //navigatetoHomeActivity();
-                    }
-                    // Else display error message
-                    else {
-                        //errorMsg.setText(obj.getString("error_msg"));
+                        Intent i = new Intent(getBaseContext(), LoginActivity.class);
+                        startActivity(i);
+                    } else {
                         Toast.makeText(getApplicationContext(), getApplicationContext().getString(R.string.register_existinguser_msg), Toast.LENGTH_LONG).show();
                     }
                 } catch (JSONException e) {
-                    // TODO Auto-generated catch block
                     Toast.makeText(getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
                     e.printStackTrace();
-
                 }
             }
 
-
             @Override
-            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-
+            public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject errorResponse) {
                 // When Http response code is '404'
                 if (statusCode == 404) {
                     Toast.makeText(getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
@@ -120,6 +106,13 @@ public class LauncherActivity extends Activity {
                     Toast.makeText(getApplicationContext(), "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet or remote server is not up and running]", Toast.LENGTH_LONG).show();
                 }
             }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, String responseString, Throwable throwable) {
+                super.onFailure(statusCode, headers, responseString, throwable);
+            }
         });
     }
+
+
 }

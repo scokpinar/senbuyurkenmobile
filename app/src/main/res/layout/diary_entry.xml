@@ -8,9 +8,8 @@
     <com.sam.senbuyurkenmobile.MyTextView
         android:id="@+id/diary_entry_date"
         style="@style/myTextView"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#b5bccacc"
         android:gravity="end"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textStyle="italic" />
@@ -25,7 +24,7 @@
     <com.sam.senbuyurkenmobile.MyTextView
         android:id="@+id/diary_entry_content"
         style="@style/myTextView"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 

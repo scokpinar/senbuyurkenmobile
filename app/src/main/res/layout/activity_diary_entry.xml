@@ -11,7 +11,6 @@
     android:theme="@android:style/Theme.NoTitleBar"
     tools:context="com.sam.senbuyurkenmobile.DiaryEntryActivity">
 
-
     <ScrollView
         android:id="@+id/diary_entry_form"
         android:layout_width="match_parent"
@@ -48,20 +47,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_column="0"
-                android:layout_gravity="center_horizontal"
                 android:layout_row="2"
                 android:onClick="saveDiaryEntry"
                 android:text="@string/saveButton" />
-
-            <Button
-                android:id="@+id/button_photo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_column="0"
-                android:layout_gravity="center_horizontal"
-                android:layout_row="3"
-                android:text="Choose Photo" />
-
 
         </GridLayout>
     </ScrollView>

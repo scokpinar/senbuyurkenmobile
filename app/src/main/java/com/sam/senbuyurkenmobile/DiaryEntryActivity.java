@@ -3,8 +3,10 @@ package com.sam.senbuyurkenmobile;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -47,27 +49,28 @@ public class DiaryEntryActivity extends Activity {
     Bitmap bitmap;
     String picturePath;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_diary_entry);
 
-        b = (Button) findViewById(R.id.button_photo);
         viewImage = (ImageView) findViewById(R.id.imageView);
-        b.setOnClickListener(new View.OnClickListener() {
+        viewImage.setImageDrawable(getResources().getDrawable(R.drawable.ic_camera));
+        viewImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 selectImage();
             }
         });
 
+
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_diary_entry, menu);
+        //MenuInflater inflater = getMenuInflater();
+        //inflater.inflate(R.menu.menu_main, menu);
+
         return true;
     }
 
@@ -182,37 +185,37 @@ public class DiaryEntryActivity extends Activity {
     }
 
     public void saveDiaryEntry(View view) {
-        // get entry text
+
+        SharedPreferences sp = getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
+
         String entry_text = ((EditText) findViewById(R.id.diary_entry)).getText().toString();
 
-
-        // Instantiate Http Request Param Object
         RequestParams params = new RequestParams();
-        // When Name Edit View, Email Edit View and Password Edit View have values other than Null
-        // Put http parameters
+
+        params.put("un", sp.getString("username", null));
+        params.put("t", sp.getString("token", null));
+
         params.put("entry_text", entry_text);
         try {
             params.put("image", new File(picturePath));
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        // Invoke RESTFull Web Service with Http parameters
-        invokeWS(params);
 
+        invokeWS(params);
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
 
     }
-
 
     public void invokeWS(RequestParams params) {
         // Show Progress Dialog
         //prgDialog.show();
         // Make RESTful webservice call using AsyncHttpClient object
         AsyncHttpClient httpClient = new AsyncHttpClient();
-        httpClient.setConnectTimeout(30 * 1000);
-        httpClient.setResponseTimeout(30 * 1000);
-        httpClient.addHeader("Connection", "Keep-Alive");
 
-        httpClient.post("http://195.142.148.22/senbuyurken/rest/diaryEntryRest/createDiaryEntry", params, new AsyncHttpResponseHandler() {
+        httpClient.post(AppUtility.APP_URL + "rest/diaryEntryRest/createDiaryEntry", params, new AsyncHttpResponseHandler() {
             // When the response returned by REST has Http response code '200'
 
             @Override
@@ -238,16 +241,6 @@ public class DiaryEntryActivity extends Activity {
                     e.printStackTrace();
 
                 }
-            }
-
-            @Override
-            public boolean getUseSynchronousMode() {
-                return false;
-            }
-
-            @Override
-            public void onProgress(int bytesWritten, int totalSize) {
-                int progressPercentage = (int) 100 * bytesWritten / totalSize;
             }
 
 
