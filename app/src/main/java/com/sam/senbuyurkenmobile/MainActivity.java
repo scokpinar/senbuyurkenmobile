@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
@@ -12,8 +14,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import java.util.ArrayList;
 
 public class MainActivity extends Activity {
 
@@ -23,7 +28,9 @@ public class MainActivity extends Activity {
     AppInfoActivity fragmentAppInfo;
     Fragment[] fragments;
     String[] fragmentTAGS = new String[]{"fragment_1", "fragment_2", "fragment_3", "fragment_4"};
+    ArrayList<NavigationItem> mNavItems = new ArrayList<NavigationItem>();
     private DrawerLayout mDrawerLayout;
+    private RelativeLayout mDrawerPane;
     private ListView mDrawerList;
     private ActionBarDrawerToggle mDrawerToggle;
     private String drawerTitle;
@@ -52,6 +59,7 @@ public class MainActivity extends Activity {
         getActionBar().setTitle(drawerTitle);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerPane = (RelativeLayout) findViewById(R.id.drawerPane);
 
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
 
@@ -74,10 +82,20 @@ public class MainActivity extends Activity {
 
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getBaseContext(),
-                R.layout.drawer_list_item, getResources().getStringArray(R.array.menu));
+        String[] menuNames = getResources().getStringArray(R.array.menu);
+
+        for (int i = 0; i < menuNames.length; i++) {
+            String menuName = menuNames[i];
+            mNavItems.add(new NavigationItem(menuName, "", R.drawable.ic_camera));
+        }
+
+        DrawerListAdapter adapter = new DrawerListAdapter(this, mNavItems);
 
         mDrawerList.setAdapter(adapter);
+
+        SharedPreferences sp = getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
+        TextView userName = (TextView) findViewById(R.id.userName);
+        userName.setText(sp.getString("username", null));
 
         getActionBar().setHomeButtonEnabled(true);
 
@@ -111,7 +129,8 @@ public class MainActivity extends Activity {
                 }
                 ft.commit();
 
-                mDrawerLayout.closeDrawer(mDrawerList);
+                //mDrawerLayout.closeDrawer(mDrawerList);
+                mDrawerLayout.closeDrawer(mDrawerPane);
 
             }
         });
@@ -133,7 +152,7 @@ public class MainActivity extends Activity {
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerList);
+        boolean drawerOpen = mDrawerLayout.isDrawerOpen(mDrawerPane);
 //        menu.findItem(R.id.action_settings).setVisible(!drawerOpen);
         return super.onPrepareOptionsMenu(menu);
     }
