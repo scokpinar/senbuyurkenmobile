@@ -13,12 +13,15 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Debug;
 import android.os.StrictMode;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -37,6 +40,7 @@ import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +48,20 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
 
     private ListView de_list_view;
     private ProgressDialog progressDialog;
+    private SwipeRefreshLayout swipeLayout;
+
+    public static void logHeap() {
+        Double allocated = new Double(Debug.getNativeHeapAllocatedSize()) / new Double((1048576));
+        Double available = new Double(Debug.getNativeHeapSize()) / 1048576.0;
+        Double free = new Double(Debug.getNativeHeapFreeSize()) / 1048576.0;
+        DecimalFormat df = new DecimalFormat();
+        df.setMaximumFractionDigits(2);
+        df.setMinimumFractionDigits(2);
+
+        Log.d("tag", "debug. =================================");
+        Log.d("tag", "debug.heap native: allocated " + df.format(allocated) + "MB of " + df.format(available) + "MB (" + df.format(free) + "MB free)");
+        Log.d("tag", "debug.memory: allocated: " + df.format(new Double(Runtime.getRuntime().totalMemory() / 1048576)) + "MB of " + df.format(new Double(Runtime.getRuntime().maxMemory() / 1048576)) + "MB (" + df.format(new Double(Runtime.getRuntime().freeMemory() / 1048576)) + "MB free)");
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -55,17 +73,38 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
             StrictMode.setThreadPolicy(policy);
         }
 
-        SwipeRefreshLayout swipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
+        swipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
         swipeLayout.setBackgroundColor(Color.TRANSPARENT);
         swipeLayout.setRefreshing(false);
         swipeLayout.setOnRefreshListener(this);
 
-        ImageButton imageButton = (ImageButton) view.findViewById(R.id.new_note);
-        imageButton.bringToFront();
-        imageButton.setOnClickListener(new View.OnClickListener() {
+        ImageButton newNote = (ImageButton) view.findViewById(R.id.new_note);
+        newNote.bringToFront();
+        newNote.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 navigateToDiaryEntryActivity();
+            }
+        });
+
+        de_list_view = (ListView) view.findViewById(R.id.de_listview);
+
+        de_list_view.setClickable(false);
+
+        de_list_view.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView absListView, int i) {
+
+            }
+
+            @Override
+            public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                if (de_list_view.getChildCount() == 0)
+                    swipeLayout.setEnabled(true);
+                else if (firstVisibleItem == 0 && visibleItemCount > 0 && de_list_view.getChildAt(0).getTop() >= 0)
+                    swipeLayout.setEnabled(true);
+                else
+                    swipeLayout.setEnabled(false);
             }
         });
 
@@ -88,20 +127,11 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
 
     @Override
     public void onRefresh() {
-        SwipeRefreshLayout swipeLayout = (SwipeRefreshLayout) getActivity().findViewById(R.id.swipe_container);
         swipeLayout.setRefreshing(false);
+        de_list_view.setAdapter(null);
         DiaryEntryFetchTask deft = new DiaryEntryFetchTask();
         deft.execute();
     }
-
-    //    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//
-//        MenuInflater inflater = getMenuInflater();
-//        inflater.inflate(R.menu.menu_main, menu);
-//
-//        return super.onCreateOptionsMenu(menu);
-//    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -161,12 +191,12 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
             if (list.size() == 0) {
 
                 tw.setVisibility(View.VISIBLE);
-                ib.setVisibility(View.VISIBLE);
+                //ib.setVisibility(View.VISIBLE);
             }
 
             if (list.size() > 0) {
                 tw.setVisibility(View.INVISIBLE);
-                ib.setVisibility(View.INVISIBLE);
+                //ib.setVisibility(View.INVISIBLE);
             }
 
             de_list_view.setAdapter(adapter);
@@ -212,14 +242,14 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
                         dew.setEntry_date(o.getString("entry_date"));
                         try {
                             params.add(new BasicNameValuePair("photo_url", o.getString("photo_url")));
-
                             httpPost2.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
                             HttpResponse response2 = client2.execute(httpPost2);
-                            Bitmap bm = BitmapFactory.decodeStream(new ByteArrayInputStream(EntityUtils.toByteArray(response2.getEntity())));
+                            byte[] bitmapByte = EntityUtils.toByteArray(response2.getEntity());
+                            Bitmap bm = loadFast(new ByteArrayInputStream(bitmapByte), new ByteArrayInputStream(bitmapByte));
+                            response2 = null;
                             dew.setImage(bm);
                             list.add(dew);
                             params.remove(params.size() - 1);
-
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -236,11 +266,16 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
 
                                 httpPost2.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
                                 HttpResponse response2 = client2.execute(httpPost2);
-                                Bitmap bm = BitmapFactory.decodeStream(new ByteArrayInputStream(EntityUtils.toByteArray(response2.getEntity())));
-                                dew.setImage(bm);
+                                byte[] bitmapByte = EntityUtils.toByteArray(response2.getEntity());
+                                Bitmap bm = loadFast(new ByteArrayInputStream(bitmapByte), new ByteArrayInputStream(bitmapByte));
+                                response2 = null;
+                                if (bm != null) {
+                                    System.out.println("Image Byte Count: " + bm.getByteCount());
+                                    dew.setImage(bm);
+                                }
                                 list.add(dew);
+                                logHeap();
                                 params.remove(params.size() - 1);
-
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
@@ -257,6 +292,43 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
             }
 
         }
+
+
+        private Bitmap loadFast(ByteArrayInputStream byteArrayInputStream, ByteArrayInputStream arrayInputStream) {
+            int DESIRED_MAX_SIZE = 500;
+
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+
+            BitmapFactory.decodeStream(byteArrayInputStream, null, options);
+
+            int h = options.outHeight;
+            int w = options.outWidth;
+
+            byteArrayInputStream = null;
+
+            // Find best sample size
+            int sampling = 1;
+
+            if (h > DESIRED_MAX_SIZE || w > DESIRED_MAX_SIZE) {
+
+                final int halfHeight = h / 2;
+                final int halfWidth = w / 2;
+
+                while ((halfHeight / sampling) > DESIRED_MAX_SIZE
+                        && (halfWidth / sampling) > DESIRED_MAX_SIZE) {
+                    sampling *= 2;
+                }
+            }
+
+            options.inSampleSize = sampling;
+            options.inJustDecodeBounds = false;
+            options.inPreferredConfig = Bitmap.Config.RGB_565;
+            options.inDither = true;
+
+            return BitmapFactory.decodeStream(arrayInputStream, null, options);
+        }
+
     }
 
 }

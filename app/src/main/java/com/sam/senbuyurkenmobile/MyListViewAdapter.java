@@ -20,6 +20,7 @@ public class MyListViewAdapter extends BaseAdapter {
     private Activity activity;
     private List<DiaryEntryWrapper> data;
 
+
     public MyListViewAdapter(Activity a, List<DiaryEntryWrapper> list) {
         activity = a;
         data = list;

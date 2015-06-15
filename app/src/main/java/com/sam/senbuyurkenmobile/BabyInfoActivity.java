@@ -58,7 +58,6 @@ public class BabyInfoActivity extends Fragment {
     private ImageButton maleButton;
     private ImageButton femaleButton;
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.activity_baby_info, container, false);
@@ -67,7 +66,6 @@ public class BabyInfoActivity extends Fragment {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
         }
-
 
         Button button = (Button) view.findViewById(R.id.babyInfoSaveButton);
         button.setOnClickListener(new View.OnClickListener() {
@@ -138,7 +136,6 @@ public class BabyInfoActivity extends Fragment {
         super.onConfigurationChanged(newConfig);
     }
 
-
     /**
      * Method gets triggered when save button is clicked
      */
@@ -185,7 +182,6 @@ public class BabyInfoActivity extends Fragment {
 
             // Invoke RESTFull Web Service with Http parameters
             invokeWS(activity, params);
-
         }
         // When any of the Edit View control left blank
         else {
@@ -194,19 +190,15 @@ public class BabyInfoActivity extends Fragment {
 
     }
 
-
     public void setBabyInfoData() {
-
         TextView name = ((EditText) view.findViewById(R.id.name));
         name.setText(babyInfo.getName());
         TextView surname = ((EditText) view.findViewById(R.id.surname));
         surname.setText(babyInfo.getSurname());
-//        RadioGroup radioGenderGroup = (RadioGroup) view.findViewById(R.id.radioGender);
         if (babyInfo.getGender().equals("E"))
             maleButton.setBackgroundColor(Color.BLUE);
-//            radioGenderGroup.check(R.id.radioMale);
-//        else if (babyInfo.getGender().equals("K"))
-//            radioGenderGroup.check(R.id.radioFemale);
+        if (babyInfo.getGender().equals("K"))
+            femaleButton.setBackgroundColor(Color.RED);
         TextView birthDate = ((EditText) view.findViewById(R.id.birthDate));
         birthDate.setText(babyInfo.getBirthDate());
         TextView birthHour = ((EditText) view.findViewById(R.id.birthHour));
@@ -223,7 +215,6 @@ public class BabyInfoActivity extends Fragment {
         gynecologyDoctor.setText(babyInfo.getGynecologyDoctor());
         TextView pediatricianDoctor = ((EditText) view.findViewById(R.id.pediatricianDoctor));
         pediatricianDoctor.setText(babyInfo.getPediatricianDoctor());
-
     }
 
     /**
@@ -234,13 +225,8 @@ public class BabyInfoActivity extends Fragment {
      */
 
     public void invokeWS(final Activity view, RequestParams params) {
-        // Show Progress Dialog
-        //prgDialog.show();
-        // Make RESTful webservice call using AsyncHttpClient object
         AsyncHttpClient client = new AsyncHttpClient();
         client.post(AppUtility.APP_URL + "rest/babyRegistrationRest/createBabyInfo", params, new AsyncHttpResponseHandler() {
-            // When the response returned by REST has Http response code '200'
-
 
             @Override
             public void onPreProcessResponse(ResponseHandlerInterface instance, HttpResponse response) {
@@ -248,45 +234,28 @@ public class BabyInfoActivity extends Fragment {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] response) {
-                // Hide Progress Dialog
-                //prgDialog.hide();
                 try {
-                    // JSON Object
                     JSONObject obj = new JSONObject(new String(response));
-                    // When the JSON response has status boolean value assigned with true
                     if (obj.getBoolean("result")) {
                         Toast.makeText(getView().getContext().getApplicationContext(), getView().getContext().getApplicationContext().getString(R.string.register_success_msg), Toast.LENGTH_LONG).show();
 
-                    }
-                    // Else display error message
-                    else {
-                        //errorMsg.setText(obj.getString("error_msg"));
+                    } else {
                         Toast.makeText(getView().getContext().getApplicationContext(), getView().getContext().getApplicationContext().getString(R.string.register_existinguser_msg), Toast.LENGTH_LONG).show();
                     }
                 } catch (JSONException e) {
-                    // TODO Auto-generated catch block
                     Toast.makeText(getView().getContext().getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
                     e.printStackTrace();
 
                 }
             }
 
-
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-
-                // Hide Progress Dialog
-                //prgDialog.hide();
-                // When Http response code is '404'
                 if (statusCode == 404) {
                     Toast.makeText(getView().getContext().getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
-                }
-                // When Http response code is '500'
-                else if (statusCode == 500) {
+                } else if (statusCode == 500) {
                     Toast.makeText(getView().getContext().getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
-                }
-                // When Http response code other than 404, 500
-                else {
+                } else {
                     Toast.makeText(getView().getContext().getApplicationContext(), "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet or remote server is not up and running]", Toast.LENGTH_LONG).show();
                 }
             }

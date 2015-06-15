@@ -3,6 +3,6 @@
     <color name="image_border_start">#F1F1F1</color>
     <color name="image_border_end">#F1F1F1</color>
     <color name="image_border_center">#F1F1F1</color>
-    <color name="default_back_color">#F1F1F1</color>
+    <color name="default_back_color">#555555</color>
 
 </resources>

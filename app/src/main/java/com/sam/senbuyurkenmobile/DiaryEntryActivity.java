@@ -41,28 +41,32 @@ import java.io.OutputStream;
 public class DiaryEntryActivity extends Activity {
 
     private static int SELECT_PICTURE = 1;
+    private static int CROP_IMG = 3;
 
     ImageView viewImage;
     Button b;
     ProgressDialog prgDialog;
     OutputStream outFile = null;
     Bitmap bitmap;
+    Bitmap croppedPic;
     String picturePath;
+    Uri selectedImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_diary_entry);
 
+
         viewImage = (ImageView) findViewById(R.id.imageView);
         viewImage.setImageDrawable(getResources().getDrawable(R.drawable.ic_camera));
+
         viewImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 selectImage();
             }
         });
-
 
     }
 
@@ -140,20 +144,15 @@ public class DiaryEntryActivity extends Activity {
                 int columnIndex = c.getColumnIndex(filePath[0]);
                 picturePath = c.getString(columnIndex);
                 c.close();
-                Bitmap thumbnail = (BitmapFactory.decodeFile(picturePath));
+                bitmap = (BitmapFactory.decodeFile(picturePath));
                 ViewGroup.LayoutParams layoutParams = viewImage.getLayoutParams();
 
                 double screen_width = viewImage.getWidth();
-                double ratio = thumbnail.getWidth() / screen_width;
+                double ratio = bitmap.getWidth() / screen_width;
 
-                Double resize_width = thumbnail.getWidth() / ratio;
-                Double resize_height = thumbnail.getHeight() / ratio;
+                bitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() / 4, bitmap.getHeight() / 4, false);
 
-                thumbnail = Bitmap.createScaledBitmap(thumbnail, resize_width.intValue(), resize_height.intValue(), false);
-                layoutParams.height = resize_height.intValue();
-                bitmap = thumbnail;
-
-                viewImage.setImageBitmap(thumbnail);
+                viewImage.setImageBitmap(bitmap);
             }
         }
     }
@@ -175,7 +174,6 @@ public class DiaryEntryActivity extends Activity {
                 } else if (options[item].equals("Choose from Gallery")) {
                     Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                     startActivityForResult(intent, 2);
-
                 } else if (options[item].equals("Cancel")) {
                     dialog.dismiss();
                 }

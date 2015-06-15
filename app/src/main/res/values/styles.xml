@@ -10,12 +10,13 @@
         <!-- 3dp so the background border to be visible -->
         <item name="android:padding">3dp</item>
         <item name="android:background">@drawable/image_border</item>
-        <item name="android:scaleType">fitCenter</item>
+        <item name="android:scaleType">centerCrop</item>
     </style>
 
     <style name="myTextView" parent="@android:style/Widget.TextView">
         <item name="com.sam.senbuyurkenmobile:font">fonts/monotype-corsiva.ttf</item>
-        <item name="android:layout_marginEnd">7dp</item>
+        <item name="android:paddingRight">10dp</item>
+        <item name="android:layout_margin">3dp</item>
     </style>
 
 </resources>

@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.READ_PROFILE" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:allowBackup="true"
@@ -39,10 +40,7 @@
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/title_activity_diary_entry"
             android:screenOrientation="portrait"></activity>
-        <activity
-            android:name=".old_BabyParentInfoActivity"
-            android:label="@string/title_activity_baby_parent_info"
-            android:theme="@style/Theme.AppCompat.Light"></activity>
+
         <activity
             android:name=".MainActivity"
             android:label="@string/title_activity_main"

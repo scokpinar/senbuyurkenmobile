@@ -11,6 +11,7 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.SyncHttpClient;
 
 import org.apache.http.Header;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -30,7 +31,10 @@ public class LauncherActivity extends Activity {
                     sleep(3 * 1000);
 
                     // After 3 seconds redirect to another intent
-                    invokeWS();
+                    //invokeWS();
+
+                    Intent i = new Intent(getBaseContext(), LoginActivity.class);
+                    startActivity(i);
 
                     //Remove activity
                     finish();
@@ -71,7 +75,7 @@ public class LauncherActivity extends Activity {
         SyncHttpClient client = new SyncHttpClient();
 
 
-        client.get(AppUtility.APP_URL + "rest/userRegistrationRest/checkURRService", new JsonHttpResponseHandler() {
+        client.get(AppUtility.APP_URL + "rest/userRegistrationRest/checkURRService/", new JsonHttpResponseHandler() {
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
@@ -92,7 +96,7 @@ public class LauncherActivity extends Activity {
             }
 
             @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject errorResponse) {
+            public void onFailure(int statusCode, Header[] headers, Throwable e, JSONArray errorResponse) {
                 // When Http response code is '404'
                 if (statusCode == 404) {
                     Toast.makeText(getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();

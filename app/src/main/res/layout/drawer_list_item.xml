@@ -23,7 +23,7 @@
         android:layout_centerVertical="true"
         android:layout_toEndOf="@+id/icon"
         android:textColor="#000"
-        android:textSize="10sp"
+        android:textSize="12sp"
         android:textStyle="bold" />
 
 </RelativeLayout>
