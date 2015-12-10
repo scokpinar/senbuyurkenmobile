@@ -1,31 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/myTextView_top"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:focusable="false"
     android:orientation="vertical"
-    android:showDividers="end">
+    android:showDividers="none">
 
     <com.sam.senbuyurkenmobile.MyTextView
         android:id="@+id/diary_entry_date"
-        style="@style/myTextView"
+        style="@style/myTextViewDate"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textStyle="italic" />
+        android:layout_gravity="center"
+        android:layout_marginLeft="1dp"
+        android:layout_marginRight="1dp"
+        android:layout_marginTop="1dp"
+        android:gravity="right"
+        android:paddingBottom="5dp"
+        android:paddingRight="5dp"
+        android:paddingTop="5dp" />
 
     <ImageView
         android:id="@+id/diary_entry_image"
-        style="@style/myImageView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:contentDescription="img" />
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:layout_marginLeft="1dp"
+        android:layout_marginRight="1dp"
+        android:background="#ffefefef"
+        android:scaleType="centerInside" />
 
     <com.sam.senbuyurkenmobile.MyTextView
         android:id="@+id/diary_entry_content"
-        style="@style/myTextView"
-        android:layout_width="match_parent"
+        style="@style/myTextViewNote"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:layout_gravity="center"
+        android:layout_marginBottom="1dp"
+        android:layout_marginLeft="1dp"
+        android:layout_marginRight="1dp"
+        android:gravity="left"
+        android:paddingBottom="5dp"
+        android:paddingLeft="5dp"
+        android:paddingTop="5dp" />
 
 </LinearLayout>

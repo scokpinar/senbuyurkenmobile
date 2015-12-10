@@ -12,6 +12,7 @@
     <string name="password">Şifre (6 ve üzeri karakter)</string>
     <string name="password2">Şifre Tekrar</string>
     <string name="saveButton">Kaydet</string>
+    <string name="cancelButton">Vazgeç</string>
     <string name="register_success_msg">Kaydınız başarıyla yapılmıştır.</string>
     <string name="register_existinguser_msg">Kullanıcı sistemde kayıtlıdır.</string>
 
@@ -37,11 +38,12 @@
 
 
     <!-- Parent Info Page -->
-    <string name="mother_name">ANNE ADI</string>
-    <string name="mother_surname">ANNE SOYADI</string>
-    <string name="father_name">BABA ADI</string>
-    <string name="father_surname">BABA SOYADI</string>
-    <string name="wedding_anniversary">EVLİLİK YILDÖNÜMÜ</string>
+    <string name="mother_name">Anne Adı</string>
+    <string name="mother_surname">Anne Soyadı</string>
+    <string name="father_name">Baba Adı</string>
+    <string name="father_surname">Baba Soyadı</string>
+    <string name="wedding_anniversary">Evlilik Tarihi</string>
+    <string name="photo_upload">Fotoğraf Yükle</string>
 
     <!-- Strings related to login -->
     <string name="title_activity_login">Giriş</string>
@@ -79,6 +81,14 @@
         <item>Bebek Bilgileri</item>
         <item>Ebeveyn Bilgileri</item>
         <item>Hakkında</item>
+    </string-array>
+
+
+    <string-array name="menu_images">
+        <item>home_selected</item>
+        <item>baby_info_selected</item>
+        <item>parent_info_selected</item>
+        <item>send_feedback_selected</item>
     </string-array>
 
     <string name="drawer_open">Open navigation drawer</string>

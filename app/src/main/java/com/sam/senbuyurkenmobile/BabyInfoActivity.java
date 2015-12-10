@@ -6,7 +6,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -82,8 +81,8 @@ public class BabyInfoActivity extends Fragment {
             @Override
             public void onClick(View v) {
                 gender = "E";
-                maleButton.setBackgroundColor(Color.BLUE);
-                femaleButton.setBackgroundColor(Color.GRAY);
+                maleButton.setImageDrawable(getResources().getDrawable(R.drawable.baby_boy_selected));
+                femaleButton.setImageDrawable(getResources().getDrawable(R.drawable.baby_girl_not_selected));
             }
         });
 
@@ -92,8 +91,8 @@ public class BabyInfoActivity extends Fragment {
             @Override
             public void onClick(View v) {
                 gender = "K";
-                maleButton.setBackgroundColor(Color.GRAY);
-                femaleButton.setBackgroundColor(Color.RED);
+                femaleButton.setImageDrawable(getResources().getDrawable(R.drawable.baby_girl_selected));
+                maleButton.setImageDrawable(getResources().getDrawable(R.drawable.baby_boy_not_selected));
             }
         });
 
@@ -196,9 +195,10 @@ public class BabyInfoActivity extends Fragment {
         TextView surname = ((EditText) view.findViewById(R.id.surname));
         surname.setText(babyInfo.getSurname());
         if (babyInfo.getGender().equals("E"))
-            maleButton.setBackgroundColor(Color.BLUE);
+            //maleButton.setBackgroundColor(Color.BLUE);
+            maleButton.setImageDrawable(getResources().getDrawable(R.drawable.baby_boy_selected));
         if (babyInfo.getGender().equals("K"))
-            femaleButton.setBackgroundColor(Color.RED);
+            femaleButton.setImageDrawable(getResources().getDrawable(R.drawable.baby_girl_selected));
         TextView birthDate = ((EditText) view.findViewById(R.id.birthDate));
         birthDate.setText(babyInfo.getBirthDate());
         TextView birthHour = ((EditText) view.findViewById(R.id.birthHour));

@@ -1,22 +1,24 @@
-<resources>
-
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="android:Theme.Holo.Light">
-        <!-- Customize your theme here. -->
-    </style>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
 
     <style name="myImageView">
         <!-- 3dp so the background border to be visible -->
         <item name="android:padding">3dp</item>
-        <item name="android:background">@drawable/image_border</item>
-        <item name="android:scaleType">centerCrop</item>
+        <item name="android:scaleType">fitXY</item>
+
     </style>
 
-    <style name="myTextView" parent="@android:style/Widget.TextView">
-        <item name="com.sam.senbuyurkenmobile:font">fonts/monotype-corsiva.ttf</item>
-        <item name="android:paddingRight">10dp</item>
-        <item name="android:layout_margin">3dp</item>
+    <style name="myTextViewDate" parent="@android:style/Widget.TextView">
+        <item name="android:background">@drawable/my_text_view_date</item>
+    </style>
+
+
+    <style name="myTextViewNote" parent="@android:style/Widget.TextView">
+        <item name="android:background">@drawable/my_text_view_note</item>
+    </style>
+
+    <style name="myTextView_top" parent="@android:style/Widget.TextView">
+        <item name="android:background">@drawable/image_border_top</item>
     </style>
 
 </resources>

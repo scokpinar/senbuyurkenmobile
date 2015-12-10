@@ -1,5 +1,10 @@
 package com.sam.senbuyurkenmobile;
 
+import android.content.ContentResolver;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.MediaStore;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.regex.Matcher;
@@ -10,15 +15,14 @@ import java.util.regex.Pattern;
  */
 public class AppUtility {
 
-    public static final String APP_URL = "http://ws.senbuyurken.com/";
-    //public static final String APP_URL = "https://afternoon-citadel-9635.herokuapp.com/";
+    //public static final String APP_URL = "http://ws.senbuyurken.com/";
+    public static final String APP_URL = "https://afternoon-citadel-9635.herokuapp.com/";
     //Email Pattern
     private static final String EMAIL_PATTERN =
             "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
                     + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
     private static Pattern pattern;
     private static Matcher matcher;
-    //public static final String APP_URL = "http://151.250.224.149/senbuyurken/";
 
     /**
      * Validate Email with regular expression
@@ -65,6 +69,17 @@ public class AppUtility {
             e.printStackTrace();
         }
         return "errorInEncrypt";
+    }
+
+    public static String getPathFromUri(ContentResolver contentResolver, Uri uri) {
+        String[] projection = {MediaStore.Images.Media.DATA};
+        Cursor cursor = contentResolver.query(uri, projection, null, null, null);
+        if (cursor == null) return null;
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
+        cursor.moveToFirst();
+        String s = cursor.getString(column_index);
+        cursor.close();
+        return s;
     }
 }
 

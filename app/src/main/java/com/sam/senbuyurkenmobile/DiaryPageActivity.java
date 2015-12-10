@@ -191,12 +191,10 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
             if (list.size() == 0) {
 
                 tw.setVisibility(View.VISIBLE);
-                //ib.setVisibility(View.VISIBLE);
             }
 
             if (list.size() > 0) {
                 tw.setVisibility(View.INVISIBLE);
-                //ib.setVisibility(View.INVISIBLE);
             }
 
             de_list_view.setAdapter(adapter);
@@ -216,13 +214,10 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
         public void invokeRestWS(List<NameValuePair> params) {
 
             Uri.Builder builder = Uri.parse(AppUtility.APP_URL + "rest/diaryEntryRest/listDiaryEntry/").buildUpon();
-            Uri.Builder builder2 = Uri.parse(AppUtility.APP_URL + "rest/diaryEntryRest/getDiaryEntryImage/").buildUpon();
 
             HttpPost httpPost = new HttpPost(builder.toString());
             HttpClient client = new DefaultHttpClient();
 
-            HttpPost httpPost2 = new HttpPost(builder2.toString());
-            HttpClient client2 = new DefaultHttpClient();
 
             try {
                 httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
@@ -232,29 +227,23 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
 
                 if (responseStr != null && !responseStr.equals("null") && !responseStr.equals("")) {
 
-                    JSONObject obj = new JSONObject(responseStr);
-                    Object arr = obj.get("diaryEntry");
+                    //JSONObject obj = new JSONObject(responseStr);
+                    JSONArray values = new JSONArray(responseStr);
 
-                    if (arr instanceof JSONObject) {
+                    for (int i = 0; i < values.length(); i++) {
+                        JSONObject o = (JSONObject) values.get(i);
+
                         DiaryEntryWrapper dew = new DiaryEntryWrapper();
-                        JSONObject o = (JSONObject) arr;
                         dew.setEntry_content(o.getString("entry_content"));
                         dew.setEntry_date(o.getString("entry_date"));
-                        try {
-                            params.add(new BasicNameValuePair("photo_url", o.getString("photo_url")));
-                            httpPost2.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
-                            HttpResponse response2 = client2.execute(httpPost2);
-                            byte[] bitmapByte = EntityUtils.toByteArray(response2.getEntity());
-                            Bitmap bm = loadFast(new ByteArrayInputStream(bitmapByte), new ByteArrayInputStream(bitmapByte));
-                            response2 = null;
-                            dew.setImage(bm);
-                            list.add(dew);
-                            params.remove(params.size() - 1);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                        params.add(new BasicNameValuePair("photo_url", o.getString("photo_url")));
+                        //byte[] bitmapByte = EntityUtils.toByteArray(response2.getEntity());
+                        //Bitmap bm = loadFast(new ByteArrayInputStream(bitmapByte), new ByteArrayInputStream(bitmapByte));
+                        //dew.setImage(bm);
+                        list.add(dew);
+                        params.remove(params.size() - 1);
 
-                    } else if (arr instanceof JSONArray) {
+                    /*} else if (arr instanceof JSONArray) {
 
                         for (int i = 0; i < ((JSONArray) arr).length(); i++) {
                             DiaryEntryWrapper dew = new DiaryEntryWrapper();
@@ -267,8 +256,15 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
                                 httpPost2.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
                                 HttpResponse response2 = client2.execute(httpPost2);
                                 byte[] bitmapByte = EntityUtils.toByteArray(response2.getEntity());
-                                Bitmap bm = loadFast(new ByteArrayInputStream(bitmapByte), new ByteArrayInputStream(bitmapByte));
-                                response2 = null;
+
+                                File temp =new File(Environment.getExternalStorageDirectory().toString()+"/temp.jpg");
+                                FileOutputStream stream = new FileOutputStream(temp);
+                                try {
+                                    stream.write(bitmapByte);
+                                } finally {
+                                    stream.close();
+                                }
+                                Bitmap bm = Picasso.with(getActivity().getApplicationContext()).load(temp).get();
                                 if (bm != null) {
                                     System.out.println("Image Byte Count: " + bm.getByteCount());
                                     dew.setImage(bm);
@@ -279,9 +275,8 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
-                        }
+                        }*/
                     }
-
 
                 }
 
@@ -323,6 +318,7 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
 
             options.inSampleSize = sampling;
             options.inJustDecodeBounds = false;
+
             options.inPreferredConfig = Bitmap.Config.RGB_565;
             options.inDither = true;
 

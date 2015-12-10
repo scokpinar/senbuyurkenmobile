@@ -225,7 +225,7 @@ public class LoginActivity extends Activity implements View.OnClickListener, Goo
             editor.apply();
 
 //            if (getUserCreateResult())
-            //              navigateToBabyInfoActivity();
+//                          navigateToBabyInfoActivity();
 //            else
 //                navigateToDiaryPageActivity();
             navigateToMainActivity();

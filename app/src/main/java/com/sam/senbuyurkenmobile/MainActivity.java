@@ -1,14 +1,15 @@
 package com.sam.senbuyurkenmobile;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,7 +21,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-public class MainActivity extends Activity {
+public class MainActivity extends ActionBarActivity {
 
     DiaryPageActivity fragmentDiaryPage;
     BabyInfoActivity fragmentBabyInfo;
@@ -41,7 +42,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        drawerTitle = getResources().getString(R.string.app_name);
+        drawerTitle = getResources().getString(R.string.title_activity_diary_page);
 
         FragmentManager fragmentManager = getFragmentManager();
         FragmentTransaction ft = fragmentManager.beginTransaction();
@@ -56,7 +57,7 @@ public class MainActivity extends Activity {
 
         fragments = new Fragment[]{fragmentDiaryPage, fragmentBabyInfo, fragmentParentInfo, fragmentAppInfo};
 
-        getActionBar().setTitle(drawerTitle);
+        getSupportActionBar().setTitle(drawerTitle);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerPane = (RelativeLayout) findViewById(R.id.drawerPane);
@@ -68,13 +69,13 @@ public class MainActivity extends Activity {
                 R.string.drawer_close) {
 
             public void onDrawerClosed(View view) {
-                getActionBar().setTitle(drawerTitle);
+                getSupportActionBar().setTitle(drawerTitle);
                 invalidateOptionsMenu();
 
             }
 
             public void onDrawerOpened(View drawerView) {
-                getActionBar().setTitle(drawerTitle);
+                getSupportActionBar().setTitle(drawerTitle);
                 invalidateOptionsMenu();
             }
 
@@ -83,10 +84,15 @@ public class MainActivity extends Activity {
         mDrawerLayout.setDrawerListener(mDrawerToggle);
 
         String[] menuNames = getResources().getStringArray(R.array.menu);
+        String[] menuImages = getResources().getStringArray(R.array.menu_images);
 
         for (int i = 0; i < menuNames.length; i++) {
             String menuName = menuNames[i];
-            mNavItems.add(new NavigationItem(menuName, "", R.drawable.ic_camera));
+            String imageName = menuImages[i];
+            Resources res = getResources();
+            int resourceId = res.getIdentifier(
+                    imageName, "drawable", getPackageName());
+            mNavItems.add(new NavigationItem(menuName, "", resourceId));
         }
 
         DrawerListAdapter adapter = new DrawerListAdapter(this, mNavItems);
@@ -97,9 +103,9 @@ public class MainActivity extends Activity {
         TextView userName = (TextView) findViewById(R.id.userName);
         userName.setText(sp.getString("username", null));
 
-        getActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
 
-        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mDrawerList.setOnItemClickListener(new OnItemClickListener() {
 

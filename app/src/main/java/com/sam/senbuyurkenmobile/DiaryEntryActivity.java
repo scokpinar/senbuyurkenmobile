@@ -7,27 +7,30 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Toast;
 
-import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.AsyncHttpResponseHandler;
-import com.loopj.android.http.RequestParams;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.Picasso;
 
-import org.apache.http.Header;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -36,21 +39,22 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class DiaryEntryActivity extends Activity {
 
+    private static final int MAX_WIDTH = 1024;
+    private static final int MAX_HEIGHT = 768;
     private static int SELECT_PICTURE = 1;
     private static int CROP_IMG = 3;
-
     ImageView viewImage;
-    Button b;
-    ProgressDialog prgDialog;
     OutputStream outFile = null;
     Bitmap bitmap;
-    Bitmap croppedPic;
-    String picturePath;
     Uri selectedImage;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,9 +76,6 @@ public class DiaryEntryActivity extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        //MenuInflater inflater = getMenuInflater();
-        //inflater.inflate(R.menu.menu_main, menu);
-
         return true;
     }
 
@@ -137,22 +138,17 @@ public class DiaryEntryActivity extends Activity {
                 }
             } else if (requestCode == 2) {
 
-                Uri selectedImage = data.getData();
-                String[] filePath = {MediaStore.Images.Media.DATA};
-                Cursor c = getContentResolver().query(selectedImage, filePath, null, null, null);
-                c.moveToFirst();
-                int columnIndex = c.getColumnIndex(filePath[0]);
-                picturePath = c.getString(columnIndex);
-                c.close();
-                bitmap = (BitmapFactory.decodeFile(picturePath));
-                ViewGroup.LayoutParams layoutParams = viewImage.getLayoutParams();
+                selectedImage = data.getData();
 
-                double screen_width = viewImage.getWidth();
-                double ratio = bitmap.getWidth() / screen_width;
+                int size = (int) Math.ceil(Math.sqrt(MAX_WIDTH * MAX_HEIGHT));
 
-                bitmap = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() / 4, bitmap.getHeight() / 4, false);
-
-                viewImage.setImageBitmap(bitmap);
+                Picasso.with(this.getApplicationContext())
+                        .load(selectedImage)
+                        .transform(new BitmapTransform(MAX_WIDTH, MAX_HEIGHT))
+                        .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
+                        .resize(size, size)
+                        .centerInside()
+                        .into(viewImage);
             }
         }
     }
@@ -166,12 +162,13 @@ public class DiaryEntryActivity extends Activity {
         builder.setItems(options, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int item) {
-                if (options[item].equals("Take Photo")) {
-                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    File f = new File(android.os.Environment.getExternalStorageDirectory(), "temp.jpg");
-                    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
-                    startActivityForResult(intent, 1);
-                } else if (options[item].equals("Choose from Gallery")) {
+                //if (options[item].equals("Take Photo")) {
+                //    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                //    File f = new File(android.os.Environment.getExternalStorageDirectory(), "temp.jpg");
+                //    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
+                //    startActivityForResult(intent, 1);
+                //} else if (options[item].equals("Choose from Gallery")) {
+                if (options[item].equals("Choose from Gallery")) {
                     Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                     startActivityForResult(intent, 2);
                 } else if (options[item].equals("Cancel")) {
@@ -182,85 +179,117 @@ public class DiaryEntryActivity extends Activity {
         builder.show();
     }
 
-    public void saveDiaryEntry(View view) {
 
+    public void cancelButtonClick(View view) {
+        finish();
+    }
+
+    public void saveDiaryEntry(View view) {
         SharedPreferences sp = getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
 
         String entry_text = ((EditText) findViewById(R.id.diary_entry)).getText().toString();
 
-        RequestParams params = new RequestParams();
+        Map<String, Object> params = new HashMap<String, Object>();
 
         params.put("un", sp.getString("username", null));
         params.put("t", sp.getString("token", null));
 
         params.put("entry_text", entry_text);
-        try {
-            params.put("image", new File(picturePath));
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        params.put("image", new File(AppUtility.getPathFromUri(getContentResolver(), selectedImage)));
 
-        invokeWS(params);
+        new SaveTask().execute(params);
+
+
+    }
+
+
+
+   /* public void saveDiaryEntry() {
+        SharedPreferences sp = getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
+
+        String entry_text = ((EditText) findViewById(R.id.diary_entry)).getText().toString();
+
+        Map<String,Object> params = new HashMap<String,Object>();
+
+        params.put("un", sp.getString("username", null));
+        params.put("t", sp.getString("token", null));
+
+        params.put("entry_text", entry_text);
+        params.put("image", new File(AppUtility.getPathFromUri(getContentResolver(),selectedImage)));
+
+                invokeWS(params);
         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
 
     }
 
-    public void invokeWS(RequestParams params) {
-        // Show Progress Dialog
-        //prgDialog.show();
-        // Make RESTful webservice call using AsyncHttpClient object
-        AsyncHttpClient httpClient = new AsyncHttpClient();
+*/
 
-        httpClient.post(AppUtility.APP_URL + "rest/diaryEntryRest/createDiaryEntry", params, new AsyncHttpResponseHandler() {
-            // When the response returned by REST has Http response code '200'
+    public void invokeWS(Map<String, Object> params) {
 
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, byte[] response) {
-                // Hide Progress Dialog
-                //prgDialog.hide();
-                try {
-                    // JSON Object
-                    JSONObject obj = new JSONObject(new String(response));
-                    // When the JSON response has status boolean value assigned with true
-                    if (obj.getBoolean("result")) {
-                        Toast.makeText(getApplicationContext(), getApplicationContext().getString(R.string.register_success_msg), Toast.LENGTH_LONG).show();
-                        // Navigate to Home screen
-                    }
-                    // Else display error message
-                    else {
-                        //errorMsg.setText(obj.getString("error_msg"));
-                        Toast.makeText(getApplicationContext(), getApplicationContext().getString(R.string.register_existinguser_msg), Toast.LENGTH_LONG).show();
-                    }
-                } catch (JSONException e) {
-                    // TODO Auto-generated catch block
-                    Toast.makeText(getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
-                    e.printStackTrace();
+        Uri.Builder builder = Uri.parse(AppUtility.APP_URL + "rest/diaryEntryRest/createDiaryEntry").buildUpon();
 
+        HttpPost httpPost = new HttpPost(builder.toString());
+        HttpClient client = new DefaultHttpClient();
+
+        MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
+        entityBuilder.setCharset(Charset.forName("UTF-8"));
+        entityBuilder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
+        entityBuilder.addBinaryBody
+                ("image", ((File) params.get("image")), ContentType.DEFAULT_BINARY, "" + System.currentTimeMillis() + ".jpg");
+        entityBuilder.addTextBody("entry_text", ((String) params.get("entry_text")), ContentType.create("text/plain", Charset.forName("UTF-8")));
+        entityBuilder.addTextBody("un", ((String) params.get("un")));
+        entityBuilder.addTextBody("t", ((String) params.get("t")));
+        HttpEntity entity = entityBuilder.build();
+
+        httpPost.setEntity(entity);
+
+        try {
+            HttpResponse response = client.execute(httpPost);
+
+            String responseStr = EntityUtils.toString(response.getEntity());
+
+            if (responseStr != null && !responseStr.equals("null") && !responseStr.equals("")) {
+                JSONObject obj = new JSONObject(responseStr);
+
+                if (obj.getBoolean("result")) {
+                    //Toast.makeText(getApplicationContext(), getApplicationContext().getString(R.string.register_success_msg), Toast.LENGTH_LONG).show();
                 }
+
             }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
 
-            @Override
-            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+    }
 
-                // Hide Progress Dialog
-                //prgDialog.hide();
-                // When Http response code is '404'
-                if (statusCode == 404) {
-                    Toast.makeText(getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
-                }
-                // When Http response code is '500'
-                else if (statusCode == 500) {
-                    Toast.makeText(getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
-                }
-                // When Http response code other than 404, 500
-                else {
-                    Toast.makeText(getApplicationContext(), "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet or remote server is not up and running]", Toast.LENGTH_LONG).show();
-                }
-            }
-        });
+    class SaveTask extends AsyncTask<Map<String, Object>, Void, Boolean> {
+        ProgressDialog progressDialog;
+
+        @Override
+        protected void onPreExecute() {
+            progressDialog = ProgressDialog.show(DiaryEntryActivity.this, "Progress Dialog Title Text", "Process Description Text", true);
+            progressDialog.setContentView(R.layout.progress_layout);
+        }
+
+        @Override
+        protected Boolean doInBackground(Map<String, Object>... params) {
+            invokeWS(params[0]);
+            return true;
+        }
+
+
+        @Override
+        protected void onPostExecute(Boolean aBoolean) {
+            progressDialog.dismiss();
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+        }
     }
 
 }
