@@ -30,7 +30,7 @@
             android:name=".LauncherActivity"
             android:label="@string/title_activity_launcher">
             <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
@@ -44,6 +44,10 @@
         <activity
             android:name=".MainActivity"
             android:label="@string/title_activity_main"></activity>
+
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="7f89ef7c0d949981eae8b00778a034e572894523" />
     </application>
 
 </manifest>

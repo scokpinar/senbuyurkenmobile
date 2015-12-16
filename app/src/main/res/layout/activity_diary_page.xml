@@ -53,11 +53,10 @@
                 android:layout_toEndOf="@+id/de_listview"
                 android:cacheColorHint="@android:color/transparent"
                 android:divider="@android:color/transparent"
-                android:dividerHeight="15dp"
+                android:dividerHeight="5dp"
                 android:fadingEdge="none"
                 android:padding="5dp"
                 android:smoothScrollbar="true" />
-
 
         </RelativeLayout>
 
