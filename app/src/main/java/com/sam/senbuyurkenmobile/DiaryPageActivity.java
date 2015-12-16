@@ -13,10 +13,9 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Debug;
 import android.os.StrictMode;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,6 +24,15 @@ import android.widget.AbsListView;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
+
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
+import com.amazonaws.auth.BasicSessionCredentials;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.util.IOUtils;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -40,28 +48,17 @@ import org.json.JSONObject;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.text.DecimalFormat;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import hugo.weaving.DebugLog;
 
 public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
 
     private ListView de_list_view;
     private ProgressDialog progressDialog;
     private SwipeRefreshLayout swipeLayout;
-
-    public static void logHeap() {
-        Double allocated = new Double(Debug.getNativeHeapAllocatedSize()) / new Double((1048576));
-        Double available = new Double(Debug.getNativeHeapSize()) / 1048576.0;
-        Double free = new Double(Debug.getNativeHeapFreeSize()) / 1048576.0;
-        DecimalFormat df = new DecimalFormat();
-        df.setMaximumFractionDigits(2);
-        df.setMinimumFractionDigits(2);
-
-        Log.d("tag", "debug. =================================");
-        Log.d("tag", "debug.heap native: allocated " + df.format(allocated) + "MB of " + df.format(available) + "MB (" + df.format(free) + "MB free)");
-        Log.d("tag", "debug.memory: allocated: " + df.format(new Double(Runtime.getRuntime().totalMemory() / 1048576)) + "MB of " + df.format(new Double(Runtime.getRuntime().maxMemory() / 1048576)) + "MB (" + df.format(new Double(Runtime.getRuntime().freeMemory() / 1048576)) + "MB free)");
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -108,6 +105,22 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
             }
         });
 
+        view.setFocusableInTouchMode(true);
+        view.requestFocus();
+
+        view.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                    if (keyCode == KeyEvent.KEYCODE_BACK) {
+                        //Toast.makeText(getActivity(), "Back Pressed", Toast.LENGTH_SHORT).show();
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
+
         return view;
     }
 
@@ -132,6 +145,7 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
         DiaryEntryFetchTask deft = new DiaryEntryFetchTask();
         deft.execute();
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -159,6 +173,7 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
         super.onConfigurationChanged(newConfig);
         //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     }
+
 
     public void navigateToDiaryEntryActivity() {
         Intent intent = new Intent(getActivity().getApplicationContext(), DiaryEntryActivity.class);
@@ -211,13 +226,22 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
             return list;
         }
 
+        @DebugLog
         public void invokeRestWS(List<NameValuePair> params) {
-
             Uri.Builder builder = Uri.parse(AppUtility.APP_URL + "rest/diaryEntryRest/listDiaryEntry/").buildUpon();
 
             HttpPost httpPost = new HttpPost(builder.toString());
             HttpClient client = new DefaultHttpClient();
 
+            SharedPreferences sp = getActivity().getApplicationContext().getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
+            String subFolder = sp.getString("uid", "") + "/";
+
+            AWSTempToken awsTempToken = AppUtility.getAWSTempToken(sp.getString("username", null), sp.getString("token", null));
+            BasicSessionCredentials basicSessionCredentials =
+                    new BasicSessionCredentials(awsTempToken.getAccessKeyId(),
+                            awsTempToken.getSecretAccessKey(),
+                            awsTempToken.getSessionToken());
+            AmazonS3 s3Client = new AmazonS3Client(basicSessionCredentials);
 
             try {
                 httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
@@ -227,7 +251,6 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
 
                 if (responseStr != null && !responseStr.equals("null") && !responseStr.equals("")) {
 
-                    //JSONObject obj = new JSONObject(responseStr);
                     JSONArray values = new JSONArray(responseStr);
 
                     for (int i = 0; i < values.length(); i++) {
@@ -236,48 +259,15 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
                         DiaryEntryWrapper dew = new DiaryEntryWrapper();
                         dew.setEntry_content(o.getString("entry_content"));
                         dew.setEntry_date(o.getString("entry_date"));
-                        params.add(new BasicNameValuePair("photo_url", o.getString("photo_url")));
-                        //byte[] bitmapByte = EntityUtils.toByteArray(response2.getEntity());
-                        //Bitmap bm = loadFast(new ByteArrayInputStream(bitmapByte), new ByteArrayInputStream(bitmapByte));
-                        //dew.setImage(bm);
+                        InputStream inputStream = loadFromAWSS3(o.getString("photo_url"), subFolder, s3Client);
+
+                        byte[] data = IOUtils.toByteArray(inputStream);
+                        ByteArrayInputStream bin = new ByteArrayInputStream(data);
+
+                        Bitmap bm = loadFast(bin);
+                        dew.setImage(bm);
                         list.add(dew);
-                        params.remove(params.size() - 1);
-
-                    /*} else if (arr instanceof JSONArray) {
-
-                        for (int i = 0; i < ((JSONArray) arr).length(); i++) {
-                            DiaryEntryWrapper dew = new DiaryEntryWrapper();
-                            JSONObject o = (JSONObject) ((JSONArray) arr).get(i);
-                            dew.setEntry_content(o.getString("entry_content"));
-                            dew.setEntry_date(o.getString("entry_date"));
-                            try {
-                                params.add(new BasicNameValuePair("photo_url", o.getString("photo_url")));
-
-                                httpPost2.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
-                                HttpResponse response2 = client2.execute(httpPost2);
-                                byte[] bitmapByte = EntityUtils.toByteArray(response2.getEntity());
-
-                                File temp =new File(Environment.getExternalStorageDirectory().toString()+"/temp.jpg");
-                                FileOutputStream stream = new FileOutputStream(temp);
-                                try {
-                                    stream.write(bitmapByte);
-                                } finally {
-                                    stream.close();
-                                }
-                                Bitmap bm = Picasso.with(getActivity().getApplicationContext()).load(temp).get();
-                                if (bm != null) {
-                                    System.out.println("Image Byte Count: " + bm.getByteCount());
-                                    dew.setImage(bm);
-                                }
-                                list.add(dew);
-                                logHeap();
-                                params.remove(params.size() - 1);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }*/
                     }
-
                 }
 
             } catch (IOException e) {
@@ -288,9 +278,40 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
 
         }
 
+        @DebugLog
+        private InputStream loadFromAWSS3(String photoURL, String subFolder, AmazonS3 s3Client) {
+            try {
+                System.out.println("Getting objects from S3 as stream\n");
 
-        private Bitmap loadFast(ByteArrayInputStream byteArrayInputStream, ByteArrayInputStream arrayInputStream) {
-            int DESIRED_MAX_SIZE = 500;
+                S3Object object = s3Client.getObject(new GetObjectRequest(
+                        AppUtility.existingBucketName, subFolder + photoURL));
+
+                return object.getObjectContent();
+
+            } catch (AmazonServiceException ase) {
+                System.out.println("Caught an AmazonServiceException, which " +
+                        "means your request made it " +
+                        "to Amazon S3, but was rejected with an error response" +
+                        " for some reason.");
+                System.out.println("Error Message:    " + ase.getMessage());
+                System.out.println("HTTP Status Code: " + ase.getStatusCode());
+                System.out.println("AWS Error Code:   " + ase.getErrorCode());
+                System.out.println("Error Type:       " + ase.getErrorType());
+                System.out.println("Request ID:       " + ase.getRequestId());
+            } catch (AmazonClientException ace) {
+                System.out.println("Caught an AmazonClientException, which " +
+                        "means the client encountered " +
+                        "an internal error while trying to " +
+                        "communicate with S3, " +
+                        "such as not being able to access the network.");
+                System.out.println("Error Message: " + ace.getMessage());
+            }
+            return null;
+        }
+
+        @DebugLog
+        private Bitmap loadFast(ByteArrayInputStream byteArrayInputStream) {
+            int DESIRED_MAX_SIZE = 1080;
 
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = true;
@@ -300,9 +321,8 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
             int h = options.outHeight;
             int w = options.outWidth;
 
-            byteArrayInputStream = null;
+            byteArrayInputStream.reset();
 
-            // Find best sample size
             int sampling = 1;
 
             if (h > DESIRED_MAX_SIZE || w > DESIRED_MAX_SIZE) {
@@ -322,7 +342,8 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
             options.inPreferredConfig = Bitmap.Config.RGB_565;
             options.inDither = true;
 
-            return BitmapFactory.decodeStream(arrayInputStream, null, options);
+            return BitmapFactory.decodeStream(byteArrayInputStream, null, options);
+
         }
 
     }

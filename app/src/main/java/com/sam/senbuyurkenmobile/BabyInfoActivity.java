@@ -146,10 +146,6 @@ public class BabyInfoActivity extends Fragment {
 
         String name = ((EditText) activity.findViewById(R.id.name)).getText().toString();
         String surname = ((EditText) activity.findViewById(R.id.surname)).getText().toString();
-//        RadioGroup radioGenderGroup = (RadioGroup) activity.findViewById(R.id.radioGender);
-//        RadioButton radioGenderButton = (RadioButton) activity.findViewById(radioGenderGroup.getCheckedRadioButtonId());
-//        if (radioGenderButton != null)
-//            gender = radioGenderButton.getText().toString();
         String birthDate = ((EditText) activity.findViewById(R.id.birthDate)).getText().toString();
         String birthHour = ((EditText) activity.findViewById(R.id.birthHour)).getText().toString();
         String birthWeight = ((EditText) activity.findViewById(R.id.birthWeight)).getText().toString();
@@ -186,7 +182,6 @@ public class BabyInfoActivity extends Fragment {
         else {
             Toast.makeText(activity.getApplicationContext().getApplicationContext(), "Please fill the fields", Toast.LENGTH_LONG).show();
         }
-
     }
 
     public void setBabyInfoData() {
@@ -195,7 +190,6 @@ public class BabyInfoActivity extends Fragment {
         TextView surname = ((EditText) view.findViewById(R.id.surname));
         surname.setText(babyInfo.getSurname());
         if (babyInfo.getGender().equals("E"))
-            //maleButton.setBackgroundColor(Color.BLUE);
             maleButton.setImageDrawable(getResources().getDrawable(R.drawable.baby_boy_selected));
         if (babyInfo.getGender().equals("K"))
             femaleButton.setImageDrawable(getResources().getDrawable(R.drawable.baby_girl_selected));

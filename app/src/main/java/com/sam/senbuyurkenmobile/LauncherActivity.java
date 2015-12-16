@@ -7,6 +7,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.crashlytics.android.Crashlytics;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.SyncHttpClient;
 
@@ -15,11 +16,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import io.fabric.sdk.android.Fabric;
+
 public class LauncherActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Fabric.with(this, new Crashlytics());
         setContentView(R.layout.activity_launcher);
 
         /****** Create Thread that will sleep for 3 seconds *************/
@@ -28,12 +32,13 @@ public class LauncherActivity extends Activity {
 
                 try {
                     // Thread will sleep for 3 seconds
-                    sleep(3 * 1000);
+                    sleep(2 * 1000);
 
                     // After 3 seconds redirect to another intent
                     //invokeWS();
 
                     Intent i = new Intent(getBaseContext(), LoginActivity.class);
+                    //Intent i = new Intent(getBaseContext(), MainActivity.class);
                     startActivity(i);
 
                     //Remove activity
