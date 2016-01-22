@@ -12,8 +12,10 @@
         android:layout_alignParentLeft="false"
         android:layout_alignParentStart="false"
         android:layout_centerVertical="true"
+        android:layout_marginBottom="5dp"
         android:layout_marginLeft="10dp"
-        android:layout_marginRight="20dp" />
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="5dp" />
 
     <TextView
         android:id="@+id/text"
@@ -22,7 +24,7 @@
         android:layout_centerVertical="true"
         android:layout_toEndOf="@+id/icon"
         android:textColor="#000"
-        android:textSize="12sp"
+        android:textSize="14sp"
         android:textStyle="bold" />
 
 </RelativeLayout>

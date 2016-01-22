@@ -189,9 +189,9 @@ public class BabyInfoActivity extends Fragment {
         name.setText(babyInfo.getName());
         TextView surname = ((EditText) view.findViewById(R.id.surname));
         surname.setText(babyInfo.getSurname());
-        if (babyInfo.getGender().equals("E"))
+        if (babyInfo.getGender() != null && babyInfo.getGender().equals("E"))
             maleButton.setImageDrawable(getResources().getDrawable(R.drawable.baby_boy_selected));
-        if (babyInfo.getGender().equals("K"))
+        if (babyInfo.getGender() != null && babyInfo.getGender().equals("K"))
             femaleButton.setImageDrawable(getResources().getDrawable(R.drawable.baby_girl_selected));
         TextView birthDate = ((EditText) view.findViewById(R.id.birthDate));
         birthDate.setText(babyInfo.getBirthDate());

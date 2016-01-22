@@ -9,15 +9,20 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
@@ -47,6 +52,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import hugo.weaving.DebugLog;
@@ -54,27 +60,51 @@ import hugo.weaving.DebugLog;
 
 public class DiaryEntryActivity extends Activity {
 
-    private static final int MAX_WIDTH = 1920;
-    private static final int MAX_HEIGHT = 1080;
+    private static final int MAX_WIDTH = 960;
+    private static final int MAX_HEIGHT = 540;
+    private static final int MAX_CHAR = 1024;
+    ImageView icon_camera;
     ImageView viewImage;
     OutputStream outFile = null;
     Bitmap bitmap;
     Uri selectedImage;
+    private TextView char_count;
+    private EditText note_area;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_diary_entry);
 
+        icon_camera = (ImageView) findViewById(R.id.icon_camera);
         viewImage = (ImageView) findViewById(R.id.imageView);
-        viewImage.setImageDrawable(getResources().getDrawable(R.drawable.ic_camera));
+        note_area = (EditText) findViewById(R.id.diary_entry);
 
-        viewImage.setOnClickListener(new View.OnClickListener() {
+        icon_camera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 selectImage();
             }
         });
+
+        char_count = (TextView) findViewById(R.id.char_count);
+
+
+        final TextWatcher txtWatcher = new TextWatcher() {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                char_count.setText(String.valueOf(MAX_CHAR - s.length()));
+            }
+
+            public void afterTextChanged(Editable s) {
+            }
+        };
+
+        note_area.addTextChangedListener(txtWatcher);
+
 
     }
 
@@ -141,12 +171,11 @@ public class DiaryEntryActivity extends Activity {
                 }
             } else if (requestCode == 2) {
                 selectedImage = data.getData();
-                int size = (int) Math.ceil(Math.sqrt(MAX_WIDTH * MAX_HEIGHT));
                 Picasso.with(this.getApplicationContext())
                         .load(selectedImage)
                         .transform(new BitmapTransform(MAX_WIDTH, MAX_HEIGHT))
                         .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
-                        .resize(size, size)
+                        .resize(MAX_WIDTH / 2, MAX_HEIGHT / 2)
                         .centerInside()
                         .into(viewImage);
             }
@@ -156,10 +185,10 @@ public class DiaryEntryActivity extends Activity {
     private void selectImage() {
 
         //final CharSequence[] options = {"Take Photo", "Choose from Gallery", "Cancel"};
-        final CharSequence[] options = {"Take Photo", "Choose from Gallery", "Cancel"};
+        final CharSequence[] options = {"Galeri", "İptal"};
 
         AlertDialog.Builder builder = new AlertDialog.Builder(DiaryEntryActivity.this);
-        builder.setTitle("Add Photo!");
+        builder.setTitle("Fotoğraf Ekle");
         builder.setItems(options, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int item) {
@@ -169,10 +198,10 @@ public class DiaryEntryActivity extends Activity {
                 //    intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(f));
                 //    startActivityForResult(intent, 1);
                 //} else if (options[item].equals("Choose from Gallery")) {
-                if (options[item].equals("Choose from Gallery")) {
+                if (options[item].equals("Galeri")) {
                     Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                     startActivityForResult(intent, 2);
-                } else if (options[item].equals("Cancel")) {
+                } else if (options[item].equals("İptal")) {
                     dialog.dismiss();
                 }
             }
@@ -195,8 +224,10 @@ public class DiaryEntryActivity extends Activity {
         params.add(new BasicNameValuePair("t", sp.getString("token", null)));
 
         params.add(new BasicNameValuePair("entry_text", entry_text));
-        params.add(new BasicNameValuePair("image", String.valueOf(System.currentTimeMillis()) + ".jpg"));
-
+        params.add(new BasicNameValuePair("entry_date", Long.toString(Calendar.getInstance().getTimeInMillis())));
+        params.add(new BasicNameValuePair("time_zone", Calendar.getInstance().getTimeZone().getID()));
+        if (selectedImage != null)
+            params.add(new BasicNameValuePair("image", String.valueOf(System.currentTimeMillis()) + ".jpg"));
         new SaveTask().execute(params);
 
     }
@@ -219,20 +250,18 @@ public class DiaryEntryActivity extends Activity {
             if (responseStr != null && !responseStr.equals("null") && !responseStr.equals("")) {
                 JSONObject obj = new JSONObject(responseStr);
 
-                if (obj.getBoolean("result")) {
+                if (obj.getBoolean("result") && selectedImage != null) {
                     Bitmap bitmap = loadFast(AppUtility.getPathFromUri(getContentResolver(), selectedImage));
 
-                    Bitmap out = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth() / 2, bitmap.getHeight() / 2, false);
                     File resizedFile = new File(android.os.Environment.getExternalStorageDirectory(), params.get(4).getValue() + ".png");
 
                     OutputStream fOut;
                     try {
                         fOut = new BufferedOutputStream(new FileOutputStream(resizedFile));
-                        out.compress(Bitmap.CompressFormat.PNG, 100, fOut);
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, fOut);
                         fOut.flush();
                         fOut.close();
                         bitmap.recycle();
-                        out.recycle();
 
                     } catch (Exception e) {
                     }
@@ -255,11 +284,16 @@ public class DiaryEntryActivity extends Activity {
 
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
+        options.inSampleSize = 1;
+        options.inJustDecodeBounds = false;
 
-        BitmapFactory.decodeFile(byteArrayInputStream, options);
+        options.inPreferredConfig = Bitmap.Config.RGB_565;
+        options.inDither = true;
 
-        int h = options.outHeight;
-        int w = options.outWidth;
+        Bitmap decodeFile = BitmapFactory.decodeFile(byteArrayInputStream, options);
+
+        int h = decodeFile.getHeight();
+        int w = decodeFile.getWidth();
 
         int sampling = 1;
 
@@ -274,13 +308,32 @@ public class DiaryEntryActivity extends Activity {
             }
         }
 
-        options.inSampleSize = sampling;
-        options.inJustDecodeBounds = false;
+        ExifInterface exifReader = null;
+        Matrix matrix = new Matrix();
+        matrix.setScale((float) 1 / sampling, (float) 1 / sampling);
 
-        options.inPreferredConfig = Bitmap.Config.RGB_565;
-        options.inDither = true;
+        try {
+            exifReader = new ExifInterface(byteArrayInputStream);
+            int orientation = exifReader.getAttributeInt(ExifInterface.TAG_ORIENTATION, -1);
+            System.out.println("orientation = " + orientation);
 
-        return BitmapFactory.decodeFile(byteArrayInputStream, options);
+            if (orientation == ExifInterface.ORIENTATION_ROTATE_90) {
+                matrix.postRotate(90);
+            } else if (orientation == ExifInterface.ORIENTATION_ROTATE_180) {
+                matrix.postRotate(180);
+            } else if (orientation == ExifInterface.ORIENTATION_ROTATE_270) {
+                matrix.postRotate(270);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        int scaledWidth = w / sampling;
+        int scaledHeight = h / sampling;
+
+        Bitmap imageScaled = Bitmap.createScaledBitmap(decodeFile, scaledWidth, scaledHeight, true);
+        Bitmap lastBitmap = Bitmap.createBitmap(imageScaled, 0, 0, imageScaled.getWidth(), imageScaled.getHeight(), matrix, false);
+        return lastBitmap;
 
     }
 

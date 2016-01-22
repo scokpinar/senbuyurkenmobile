@@ -2,6 +2,7 @@ package com.sam.senbuyurkenmobile;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -50,7 +51,14 @@ public class MyListViewAdapter extends BaseAdapter {
 
         diary_entry_date.setText(data.get(position).getEntry_date());
         diary_entry_content.setText(data.get(position).getEntry_content());
-        diary_entry_image.setImageBitmap(data.get(position).getImage());
+        Bitmap bmp = data.get(position).getImage();
+        if (bmp == null) {
+            diary_entry_image.setMaxHeight(0);
+            diary_entry_image.setImageBitmap(null);
+
+        } else {
+            diary_entry_image.setImageBitmap(bmp);
+        }
         return vi;
     }
 }

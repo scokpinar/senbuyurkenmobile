@@ -25,16 +25,16 @@
     <!-- Baby Info Page -->
     <string name="radio_male">Erkek</string>
     <string name="radio_female">Kız</string>
-    <string name="baby_name">ADI</string>
-    <string name="baby_surname">SOYADI</string>
-    <string name="birthDate">DOĞUM TARİHİ</string>
-    <string name="birthHour">DOĞUM SAATİ</string>
-    <string name="birthWeight">DOĞUM KİLOSU (gr)</string>
-    <string name="birthLength">DOĞUM BOYU (cm)</string>
-    <string name="birthPlace">DOĞUM YERİ</string>
-    <string name="hospital">HASTANE</string>
-    <string name="gynecologyDoctor">DOĞUM DOKTORU</string>
-    <string name="pediatricianDoctor">ÇOCUK DOKTORU</string>
+    <string name="baby_name">Adı</string>
+    <string name="baby_surname">Soyadı</string>
+    <string name="birthDate">Doğum Tarihi</string>
+    <string name="birthHour">Doğum Saati</string>
+    <string name="birthWeight">Doğum Kilosu (gr)</string>
+    <string name="birthLength">Doğum Boyu (cm)</string>
+    <string name="birthPlace">Doğum Yeri</string>
+    <string name="hospital">Hastane</string>
+    <string name="gynecologyDoctor">Doğum Doktoru</string>
+    <string name="pediatricianDoctor">Çocuk Doktoru</string>
 
 
     <!-- Parent Info Page -->
@@ -63,7 +63,7 @@
     <string name="title_activity_launcher">Sen Büyürken</string>
     <string name="title_activity_diary_entry">Yeni Not</string>
     <string name="diary_enty_new_entry">Yeni Not</string>
-    <string name="diary_enty_text">Notlarınızı girebilirsiniz...</string>
+    <string name="diary_enty_text">Unutulmaz \'an\'ları kaçırmayın, hemen not almaya başlayın :)</string>
     <string name="title_activity_diary_page">Notlarım</string>
     <string name="title_activity_main">MainActivity</string>
 
@@ -85,10 +85,10 @@
 
 
     <string-array name="menu_images">
-        <item>home_selected</item>
-        <item>baby_info_selected</item>
-        <item>parent_info_selected</item>
-        <item>send_feedback_selected</item>
+        <item>ic_drawer_notes</item>
+        <item>ic_drawer_baby_info</item>
+        <item>ic_drawer_parents</item>
+        <item>ic_drawer_about</item>
     </string-array>
 
     <string name="drawer_open">Open navigation drawer</string>

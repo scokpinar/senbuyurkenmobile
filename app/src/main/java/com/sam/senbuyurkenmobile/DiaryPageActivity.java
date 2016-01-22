@@ -6,6 +6,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -23,7 +24,6 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
@@ -63,6 +63,7 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View view = inflater.inflate(R.layout.activity_diary_page, container, false);
 
         if (android.os.Build.VERSION.SDK_INT > 9) {
@@ -132,6 +133,8 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
         if (savedInstanceState == null) {
             DiaryEntryFetchTask deft = new DiaryEntryFetchTask();
             deft.execute();
@@ -174,7 +177,6 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
         //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     }
 
-
     public void navigateToDiaryEntryActivity() {
         Intent intent = new Intent(getActivity().getApplicationContext(), DiaryEntryActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -199,18 +201,6 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
             Activity a = getActivity();
             MyListViewAdapter adapter = new MyListViewAdapter(a, list);
             de_list_view = (ListView) a.findViewById(R.id.de_listview);
-
-            TextView tw = (TextView) a.findViewById(R.id.empty_msg);
-            ImageButton ib = (ImageButton) a.findViewById(R.id.new_note);
-
-            if (list.size() == 0) {
-
-                tw.setVisibility(View.VISIBLE);
-            }
-
-            if (list.size() > 0) {
-                tw.setVisibility(View.INVISIBLE);
-            }
 
             de_list_view.setAdapter(adapter);
             progressDialog.dismiss();
@@ -259,13 +249,15 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
                         DiaryEntryWrapper dew = new DiaryEntryWrapper();
                         dew.setEntry_content(o.getString("entry_content"));
                         dew.setEntry_date(o.getString("entry_date"));
-                        InputStream inputStream = loadFromAWSS3(o.getString("photo_url"), subFolder, s3Client);
-
-                        byte[] data = IOUtils.toByteArray(inputStream);
-                        ByteArrayInputStream bin = new ByteArrayInputStream(data);
-
-                        Bitmap bm = loadFast(bin);
-                        dew.setImage(bm);
+                        if (o.getString("photo_url") != null && !o.getString("photo_url").equals("null")) {
+                            InputStream inputStream = loadFromAWSS3(o.getString("photo_url"), subFolder, s3Client);
+                            byte[] data = IOUtils.toByteArray(inputStream);
+                            ByteArrayInputStream bin = new ByteArrayInputStream(data);
+                            Bitmap bm = loadFast(bin);
+                            dew.setImage(bm);
+                        } else {
+                            dew.setImage(null);
+                        }
                         list.add(dew);
                     }
                 }

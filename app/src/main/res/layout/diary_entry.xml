@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/myTextView_top"
-    android:layout_width="fill_parent"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:focusable="false"
     android:orientation="vertical"
@@ -10,7 +10,7 @@
     <com.sam.senbuyurkenmobile.MyTextView
         android:id="@+id/diary_entry_date"
         style="@style/myTextViewDate"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginLeft="0dp"
@@ -23,15 +23,17 @@
 
     <ImageView
         android:id="@+id/diary_entry_image"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:adjustViewBounds="true"
         android:background="#ffffffff"
+        android:minHeight="0dp"
         android:scaleType="fitXY" />
 
     <com.sam.senbuyurkenmobile.MyTextView
         android:id="@+id/diary_entry_content"
         style="@style/myTextViewNote"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginBottom="1dp"

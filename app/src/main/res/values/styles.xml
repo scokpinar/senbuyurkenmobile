@@ -8,6 +8,11 @@
 
     </style>
 
+
+    <style name="myButtonStyle" parent="@android:style/Widget.Button">
+        <item name="android:textAllCaps">false</item>
+    </style>
+
     <style name="myTextViewDate" parent="@android:style/Widget.TextView">
         <item name="android:background">@drawable/my_text_view_date</item>
     </style>

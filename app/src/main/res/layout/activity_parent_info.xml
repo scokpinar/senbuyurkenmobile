@@ -12,12 +12,13 @@
 
     <ScrollView
         android:id="@+id/parent_info_form"
-        android:layout_width="fill_parent"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentEnd="false"
+        android:layout_alignParentEnd="true"
         android:layout_centerHorizontal="true"
+        android:background="#ffffff"
         android:fillViewport="false"
-        android:padding="20dp">
+        android:padding="10dp">
 
         <TableLayout
             android:layout_width="fill_parent"
@@ -30,7 +31,6 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content">
 
-
                 <Button
                     android:id="@+id/mother_photo"
                     android:layout_width="match_parent"
@@ -39,8 +39,9 @@
                     android:drawableTop="@drawable/mom"
                     android:text="@string/photo_upload" />
 
-
-                <TableLayout android:paddingLeft="20dp">
+                <TableLayout
+                    android:layout_gravity="center_vertical"
+                    android:paddingLeft="20dp">
 
                     <TableRow>
 
@@ -112,7 +113,9 @@
                     android:drawableTop="@drawable/dad"
                     android:text="@string/photo_upload" />
 
-                <TableLayout android:paddingLeft="20dp">
+                <TableLayout
+                    android:layout_gravity="center_vertical"
+                    android:paddingLeft="20dp">
 
                     <TableRow>
 
@@ -198,16 +201,17 @@
 
 
             <TableRow
-                android:layout_width="fill_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="right"
                 android:paddingTop="20dp">
 
                 <Button
                     android:id="@+id/parentInfoSaveButton"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:background="#405A65"
+                    style="@style/myButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/my_rounded_button"
                     android:text="@string/saveButton"
                     android:textColor="#FFFFFF" />
             </TableRow>

@@ -31,9 +31,9 @@ import hugo.weaving.DebugLog;
  */
 public class AppUtility {
 
-    //public static final String APP_URL = "http://ws.senbuyurken.com/";
-    public static final String APP_URL = "https://afternoon-citadel-9635.herokuapp.com/";
-    //public static final String APP_URL = "http://217.131.75.238/senbuyurken/";
+    public static final String APP_URL = "http://ws.senbuyurken.com/";
+    //public static final String APP_URL = "https://afternoon-citadel-9635.herokuapp.com/";
+    //public static final String APP_URL = "http://176.40.111.86/senbuyurken/";
 
     public static final String existingBucketName = "c79d97161ef8f66e341b304673c24ce7";
 
