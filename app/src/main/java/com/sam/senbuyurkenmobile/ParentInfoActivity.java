@@ -6,9 +6,9 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Looper;
 import android.os.StrictMode;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -27,22 +27,34 @@ import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
 import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by SametCokpinar on 08/03/15.
  */
 public class ParentInfoActivity extends Fragment {
 
-    private ProgressDialog progressDialog;
+    private View view;
     private ParentInfoWrapper piw = new ParentInfoWrapper();
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        // TODO Auto-generated method stub
-        View view = inflater.inflate(R.layout.activity_parent_info, container, false);
+        view = inflater.inflate(R.layout.activity_parent_info, container, false);
 
         if (android.os.Build.VERSION.SDK_INT > 9) {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -73,6 +85,7 @@ public class ParentInfoActivity extends Fragment {
             ParentInfoFetchTask pift = new ParentInfoFetchTask();
             pift.execute();
 
+
         }
     }
 
@@ -100,21 +113,18 @@ public class ParentInfoActivity extends Fragment {
 
     public void setParentInfoData() {
 
-        Activity activity = getActivity();
-
-        TextView mother_name = ((EditText) activity.findViewById(R.id.mother_name));
+        TextView mother_name = ((EditText) view.findViewById(R.id.mother_name));
         mother_name.setText(piw.getMother_name());
-        TextView mother_surname = ((EditText) activity.findViewById(R.id.mother_surname));
+        TextView mother_surname = ((EditText) view.findViewById(R.id.mother_surname));
         mother_surname.setText(piw.getMother_surname());
 
-        TextView father_name = ((EditText) activity.findViewById(R.id.father_name));
+        TextView father_name = ((EditText) view.findViewById(R.id.father_name));
         father_name.setText(piw.getFather_name());
-        TextView father_surname = ((EditText) activity.findViewById(R.id.father_surname));
+        TextView father_surname = ((EditText) view.findViewById(R.id.father_surname));
         father_surname.setText(piw.getFather_surname());
 
-        TextView wedding_anniversary = ((EditText) activity.findViewById(R.id.wedding_anniversary));
+        TextView wedding_anniversary = ((EditText) view.findViewById(R.id.wedding_anniversary));
         wedding_anniversary.setText(piw.getWedding_anniversary());
-
 
     }
 
@@ -122,7 +132,7 @@ public class ParentInfoActivity extends Fragment {
         Activity activity = getActivity();
 
         SharedPreferences sp = activity.getApplicationContext().getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
-        String email = sp.getString("username", null);
+        String email = sp.getString("userName", null);
 
         String mother_name = ((EditText) activity.findViewById(R.id.mother_name)).getText().toString();
         String mother_surname = ((EditText) activity.findViewById(R.id.mother_surname)).getText().toString();
@@ -139,7 +149,6 @@ public class ParentInfoActivity extends Fragment {
             params.put("email", email);
             params.put("mother_name", mother_name);
             params.put("mother_surname", mother_surname);
-
             params.put("father_name", father_name);
             params.put("father_surname", father_surname);
             params.put("wedding_anniversary", wedding_anniversary);
@@ -211,8 +220,9 @@ public class ParentInfoActivity extends Fragment {
         });
     }
 
-
     class ParentInfoFetchTask extends AsyncTask<String, Void, ParentInfoWrapper> {
+
+        private ProgressDialog progressDialog;
 
         public ParentInfoFetchTask() {
         }
@@ -226,76 +236,53 @@ public class ParentInfoActivity extends Fragment {
         @Override
         protected void onPostExecute(ParentInfoWrapper piw) {
             progressDialog.dismiss();
-        }
+            setParentInfoData();
 
+        }
 
         protected ParentInfoWrapper doInBackground(String... urls) {
             Activity activity = getActivity();
             SharedPreferences sp = activity.getApplicationContext().getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
-            RequestParams params = new RequestParams();
-            params.add("email", sp.getString("username", null));
+            List<NameValuePair> params = new ArrayList<NameValuePair>();
+            params.add(new BasicNameValuePair("email", sp.getString("userName", null)));
             invokeRestWS(params);
             return piw;
         }
 
-        public void invokeRestWS(RequestParams params) {
-            // Make RESTful webservice call using AsyncHttpClient object
-            AsyncHttpClient client = new AsyncHttpClient();
-            client.post(AppUtility.APP_URL + "rest/parentRegistrationRest/getParentInfo", params, new AsyncHttpResponseHandler(Looper.getMainLooper()) {
-                // When the response returned by REST has Http response code '200'
+        public void invokeRestWS(List<NameValuePair> params) {
+            Uri.Builder builder = Uri.parse(AppUtility.APP_URL + "rest/parentRegistrationRest/getParentInfo").buildUpon();
 
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, byte[] response) {
+            HttpPost httpPost = new HttpPost(builder.toString());
+            HttpClient client = new DefaultHttpClient();
 
-                    try {
-                        String responseStr = new String(response);
+            try {
+                httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+                HttpResponse response = client.execute(httpPost);
 
-                        if (!responseStr.equals("null") && !responseStr.equals("")) {
-                            JSONObject obj = new JSONObject(responseStr);
-                            // When the JSON response has status boolean value assigned with true
-                            if (obj.getString("parentInfoId") != null) {
+                String responseStr = EntityUtils.toString(response.getEntity());
 
-                                piw.setMother_name(obj.getString("motherName"));
-                                piw.setMother_surname(obj.getString("motherSurname"));
-                                piw.setFather_name(obj.getString("fatherName"));
-                                piw.setFather_surname(obj.getString("fatherSurname"));
-                                piw.setWedding_anniversary(obj.getString("weddingAnniversary"));
+                if (responseStr != null && !responseStr.equals("null") && !responseStr.equals("")) {
+                    JSONObject obj = new JSONObject(responseStr);
 
-                                setParentInfoData();
-
-
-                            } else {
-                                //errorMsg.setText(obj.getString("error_msg"));
-                                //Toast.makeText(view.getContext().getApplicationContext(), view.getContext().getApplicationContext().getString(R.string.register_existinguser_msg), Toast.LENGTH_LONG).show();
-                            }
-                        }
-                    } catch (JSONException e) {
-                        //Toast.makeText(getView().getContext().getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
-                        e.printStackTrace();
-
+                    if (obj.getString("parentInfoId") != null) {
+                        piw.setMother_name(obj.getString("motherName"));
+                        piw.setMother_surname(obj.getString("motherSurname"));
+                        piw.setFather_name(obj.getString("fatherName"));
+                        piw.setFather_surname(obj.getString("fatherSurname"));
+                        piw.setWedding_anniversary(obj.getString("weddingAnniversary"));
                     }
                 }
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            } catch (ClientProtocolException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
 
-                @Override
-                public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-                    // When Http response code is '404'
-                    if (statusCode == 404) {
-                        //Toast.makeText(getView().getContext().getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
-                    }
-                    // When Http response code is '500'
-                    else if (statusCode == 500) {
-                        //Toast.makeText(getView().getContext().getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
-                    }
-                    // When Http response code other than 404, 500
-                    else {
-                        //Toast.makeText(getView().getContext().getApplicationContext(), "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet or remote server is not up and running]", Toast.LENGTH_LONG).show();
-                    }
-                }
-
-            });
         }
-
     }
-
 
 }
