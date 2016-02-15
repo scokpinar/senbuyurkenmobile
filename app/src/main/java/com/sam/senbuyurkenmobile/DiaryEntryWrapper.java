@@ -9,10 +9,20 @@ import java.io.Serializable;
  */
 public class DiaryEntryWrapper implements Serializable {
 
+    String entry_title;
     String entry_content;
     String entry_date;
     Bitmap image;
+    Boolean hasImage = false;
 
+
+    public String getEntry_title() {
+        return entry_title;
+    }
+
+    public void setEntry_title(String entry_title) {
+        this.entry_title = entry_title;
+    }
 
     public String getEntry_content() {
         return entry_content;
@@ -36,5 +46,13 @@ public class DiaryEntryWrapper implements Serializable {
 
     public void setImage(Bitmap image) {
         this.image = image;
+    }
+
+    public Boolean getHasImage() {
+        return hasImage;
+    }
+
+    public void setHasImage(Boolean hasImage) {
+        this.hasImage = hasImage;
     }
 }

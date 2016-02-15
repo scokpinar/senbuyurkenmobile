@@ -114,7 +114,6 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if (event.getAction() == KeyEvent.ACTION_DOWN) {
                     if (keyCode == KeyEvent.KEYCODE_BACK) {
-                        //Toast.makeText(getActivity(), "Back Pressed", Toast.LENGTH_SHORT).show();
                         return true;
                     }
                 }
@@ -174,7 +173,6 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     }
 
     public void navigateToDiaryEntryActivity() {
@@ -185,8 +183,7 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
 
     class DiaryEntryFetchTask extends AsyncTask<String, Void, List<DiaryEntryWrapper>> {
 
-        private List<DiaryEntryWrapper> list = new ArrayList<DiaryEntryWrapper>();
-
+        private List<DiaryEntryWrapper> list = new ArrayList<>();
         private SharedPreferences sp;
 
         @Override
@@ -201,7 +198,6 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
             Activity a = getActivity();
             MyListViewAdapter adapter = new MyListViewAdapter(a, list);
             de_list_view = (ListView) a.findViewById(R.id.de_listview);
-
             de_list_view.setAdapter(adapter);
             progressDialog.dismiss();
         }
@@ -209,24 +205,28 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
         protected List<DiaryEntryWrapper> doInBackground(String... urls) {
             Activity a = getActivity();
             sp = a.getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
+
             List<NameValuePair> params = new ArrayList<NameValuePair>();
-            params.add(new BasicNameValuePair("un", sp.getString("username", null)));
-            params.add(new BasicNameValuePair("t", sp.getString("token", null)));
-            invokeRestWS(params);
+
+            String userName = sp.getString("userName", null);
+            params.add(new BasicNameValuePair("userName", userName));
+            params.add(new BasicNameValuePair("token", AppUtility.getGoogleTempToken(getActivity(), userName)));
+            params.add(new BasicNameValuePair("validUser", sp.getBoolean("validUser", false) + ""));
+            invokeListDiaryEntryWS(params);
             return list;
         }
 
         @DebugLog
-        public void invokeRestWS(List<NameValuePair> params) {
+        public void invokeListDiaryEntryWS(List<NameValuePair> params) {
             Uri.Builder builder = Uri.parse(AppUtility.APP_URL + "rest/diaryEntryRest/listDiaryEntry/").buildUpon();
 
             HttpPost httpPost = new HttpPost(builder.toString());
             HttpClient client = new DefaultHttpClient();
 
             SharedPreferences sp = getActivity().getApplicationContext().getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
-            String subFolder = sp.getString("uid", "") + "/";
+            String subFolder = sp.getString("userId", "") + "/";
 
-            AWSTempToken awsTempToken = AppUtility.getAWSTempToken(sp.getString("username", null), sp.getString("token", null));
+            AWSTempToken awsTempToken = AppUtility.getAWSTempToken(getActivity().getApplicationContext(), params.get(0).getValue(), params.get(2).getValue());
             BasicSessionCredentials basicSessionCredentials =
                     new BasicSessionCredentials(awsTempToken.getAccessKeyId(),
                             awsTempToken.getSecretAccessKey(),
@@ -247,24 +247,28 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
                         JSONObject o = (JSONObject) values.get(i);
 
                         DiaryEntryWrapper dew = new DiaryEntryWrapper();
+                        dew.setEntry_title(o.getString("entry_title"));
                         dew.setEntry_content(o.getString("entry_content"));
                         dew.setEntry_date(o.getString("entry_date"));
                         if (o.getString("photo_url") != null && !o.getString("photo_url").equals("null")) {
                             InputStream inputStream = loadFromAWSS3(o.getString("photo_url"), subFolder, s3Client);
-                            byte[] data = IOUtils.toByteArray(inputStream);
-                            ByteArrayInputStream bin = new ByteArrayInputStream(data);
-                            Bitmap bm = loadFast(bin);
-                            dew.setImage(bm);
+                            //todo: Image not found gibi bir mesaj koymamız gerekiyor.
+                            if (inputStream != null) {
+                                byte[] data = IOUtils.toByteArray(inputStream);
+                                ByteArrayInputStream bin = new ByteArrayInputStream(data);
+                                Bitmap bm = loadFast(bin);
+                                dew.setImage(bm);
+                                dew.setHasImage(true);
+                            }
                         } else {
                             dew.setImage(null);
+                            dew.setHasImage(false);
                         }
                         list.add(dew);
                     }
                 }
 
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
+            } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
 
@@ -277,7 +281,6 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
 
                 S3Object object = s3Client.getObject(new GetObjectRequest(
                         AppUtility.existingBucketName, subFolder + photoURL));
-
                 return object.getObjectContent();
 
             } catch (AmazonServiceException ase) {
@@ -330,14 +333,11 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
 
             options.inSampleSize = sampling;
             options.inJustDecodeBounds = false;
-
             options.inPreferredConfig = Bitmap.Config.RGB_565;
             options.inDither = true;
 
             return BitmapFactory.decodeStream(byteArrayInputStream, null, options);
 
         }
-
     }
-
 }

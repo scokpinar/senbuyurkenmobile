@@ -31,7 +31,6 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 
 import org.apache.http.HttpResponse;
@@ -173,9 +172,8 @@ public class DiaryEntryActivity extends Activity {
                 selectedImage = data.getData();
                 Picasso.with(this.getApplicationContext())
                         .load(selectedImage)
-                        .transform(new BitmapTransform(MAX_WIDTH, MAX_HEIGHT))
-                        .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
-                        .resize(MAX_WIDTH / 2, MAX_HEIGHT / 2)
+                        .resize(MAX_WIDTH, MAX_HEIGHT)
+                        .onlyScaleDown()
                         .centerInside()
                         .into(viewImage);
             }
@@ -184,7 +182,6 @@ public class DiaryEntryActivity extends Activity {
 
     private void selectImage() {
 
-        //final CharSequence[] options = {"Take Photo", "Choose from Gallery", "Cancel"};
         final CharSequence[] options = {"Galeri", "İptal"};
 
         AlertDialog.Builder builder = new AlertDialog.Builder(DiaryEntryActivity.this);
@@ -209,32 +206,27 @@ public class DiaryEntryActivity extends Activity {
         builder.show();
     }
 
-    public void cancelButtonClick(View view) {
-        finish();
-    }
-
     public void saveDiaryEntry(View view) {
         SharedPreferences sp = getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
 
-        String entry_text = ((EditText) findViewById(R.id.diary_entry)).getText().toString();
+        String entryText = ((EditText) findViewById(R.id.diary_entry)).getText().toString();
+        String entryTitle = ((EditText) findViewById(R.id.entry_title)).getText().toString();
 
         List<NameValuePair> params = new ArrayList<>();
-        params.add(new BasicNameValuePair("email", sp.getString("username", null)));
-        params.add(new BasicNameValuePair("un", sp.getString("username", null)));
-        params.add(new BasicNameValuePair("t", sp.getString("token", null)));
 
-        params.add(new BasicNameValuePair("entry_text", entry_text));
-        params.add(new BasicNameValuePair("entry_date", Long.toString(Calendar.getInstance().getTimeInMillis())));
-        params.add(new BasicNameValuePair("time_zone", Calendar.getInstance().getTimeZone().getID()));
+
+        params.add(new BasicNameValuePair("validUser", sp.getBoolean("validUser", false) + ""));
+        params.add(new BasicNameValuePair("entryTitle", entryTitle));
+        params.add(new BasicNameValuePair("entryText", entryText));
+        params.add(new BasicNameValuePair("entryDate", Long.toString(Calendar.getInstance().getTimeInMillis())));
+        params.add(new BasicNameValuePair("timeZone", Calendar.getInstance().getTimeZone().getID()));
         if (selectedImage != null)
-            params.add(new BasicNameValuePair("image", String.valueOf(System.currentTimeMillis()) + ".jpg"));
+            params.add(new BasicNameValuePair("photoURL", String.valueOf(System.currentTimeMillis()) + ".jpg"));
         new SaveTask().execute(params);
-
     }
 
     @DebugLog
     public void invokeWS(List<NameValuePair> params) {
-
         Uri.Builder builder = Uri.parse(AppUtility.APP_URL + "rest/diaryEntryRest/createDiaryEntry").buildUpon();
 
         HttpPost httpPost = new HttpPost(builder.toString());
@@ -252,9 +244,7 @@ public class DiaryEntryActivity extends Activity {
 
                 if (obj.getBoolean("result") && selectedImage != null) {
                     Bitmap bitmap = loadFast(AppUtility.getPathFromUri(getContentResolver(), selectedImage));
-
-                    File resizedFile = new File(android.os.Environment.getExternalStorageDirectory(), params.get(4).getValue() + ".png");
-
+                    File resizedFile = new File(android.os.Environment.getExternalStorageDirectory(), params.get(7).getValue() + ".png");
                     OutputStream fOut;
                     try {
                         fOut = new BufferedOutputStream(new FileOutputStream(resizedFile));
@@ -265,19 +255,15 @@ public class DiaryEntryActivity extends Activity {
 
                     } catch (Exception e) {
                     }
-                    saveToAWSS3(resizedFile, params.get(4).getValue());
+                    saveToAWSS3(resizedFile, params.get(7).getValue());
                 }
-
             }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-
     }
-
 
     private Bitmap loadFast(String byteArrayInputStream) {
         int DESIRED_MAX_SIZE = 1080;
@@ -308,7 +294,7 @@ public class DiaryEntryActivity extends Activity {
             }
         }
 
-        ExifInterface exifReader = null;
+        ExifInterface exifReader;
         Matrix matrix = new Matrix();
         matrix.setScale((float) 1 / sampling, (float) 1 / sampling);
 
@@ -341,9 +327,9 @@ public class DiaryEntryActivity extends Activity {
     private void saveToAWSS3(File image, String fileName) {
         SharedPreferences sp = getApplicationContext().getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
 
-        String subFolderOriginal = sp.getString("uid", "") + "/";
+        String subFolderOriginal = sp.getString("userId", "") + "/";
 
-        AWSTempToken awsTempToken = AppUtility.getAWSTempToken(sp.getString("username", null), sp.getString("token", null));
+        AWSTempToken awsTempToken = AppUtility.getAWSTempToken(getApplicationContext(), sp.getString("userName", null), (sp.getBoolean("validUser", false) + ""));
         BasicSessionCredentials basicSessionCredentials =
                 new BasicSessionCredentials(awsTempToken.getAccessKeyId(),
                         awsTempToken.getSecretAccessKey(),
@@ -358,7 +344,6 @@ public class DiaryEntryActivity extends Activity {
 
             por4Original.setCannedAcl(CannedAccessControlList.AuthenticatedRead);
             s3Client.putObject(por4Original);
-
 
         } catch (AmazonServiceException ase) {
             System.out.println("Caught an AmazonServiceException, which " +
@@ -386,14 +371,19 @@ public class DiaryEntryActivity extends Activity {
 
         @Override
         protected void onPreExecute() {
-            progressDialog = ProgressDialog.show(DiaryEntryActivity.this, "Progress Dialog Title Text", "Process Description Text", true);
+            progressDialog = ProgressDialog.show(DiaryEntryActivity.this, "", "", true);
             progressDialog.setContentView(R.layout.progress_layout);
         }
 
         @SafeVarargs
         @Override
         protected final Boolean doInBackground(List<NameValuePair>... params) {
-            invokeWS(params[0]);
+            List<NameValuePair> param = params[0];
+            SharedPreferences sp = getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
+            String userName = sp.getString("userName", null);
+            param.add(new BasicNameValuePair("userName", userName));
+            param.add((new BasicNameValuePair("token", AppUtility.getGoogleTempToken(getApplication().getApplicationContext(), userName))));
+            invokeWS(param);
             return true;
         }
 
