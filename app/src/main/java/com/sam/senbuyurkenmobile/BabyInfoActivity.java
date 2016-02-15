@@ -142,7 +142,7 @@ public class BabyInfoActivity extends Fragment {
         Activity activity = getActivity();
 
         SharedPreferences sp = activity.getApplicationContext().getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
-        String email = sp.getString("username", null);
+        String email = sp.getString("userName", null);
 
         String name = ((EditText) activity.findViewById(R.id.name)).getText().toString();
         String surname = ((EditText) activity.findViewById(R.id.surname)).getText().toString();
@@ -280,7 +280,7 @@ public class BabyInfoActivity extends Fragment {
             Activity activity = getActivity();
             SharedPreferences sp = activity.getApplicationContext().getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
             List<NameValuePair> params = new ArrayList<NameValuePair>();
-            params.add(new BasicNameValuePair("email", sp.getString("username", null)));
+            params.add(new BasicNameValuePair("email", sp.getString("userName", null)));
             invokeRestWS(params);
             return babyInfo;
         }
@@ -328,8 +328,6 @@ public class BabyInfoActivity extends Fragment {
             }
 
         }
-
-
     }
 
 }
