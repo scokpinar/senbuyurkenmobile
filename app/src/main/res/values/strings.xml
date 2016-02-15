@@ -17,9 +17,11 @@
     <string name="register_existinguser_msg">Kullanıcı sistemde kayıtlıdır.</string>
 
 
-    <!-- Diary Page -->
+    <!-- Diary Entry Page -->
 
-    <string name="dp_empty_msg">Bebeğinizin unutulmaz anlarını kaçırmayın...Hemen hatıralarınızı kaydetmeye başlayın...</string>
+    <string name="diary_entry_text">Unutulmaz \'an\'ları kaçırmayın, hemen not almaya başlayın :)</string>
+    <string name="diary_entry_text_length">1024</string>
+    <string name="diary_entry_title">Başlık</string>
 
 
     <!-- Baby Info Page -->
@@ -63,7 +65,6 @@
     <string name="title_activity_launcher">Sen Büyürken</string>
     <string name="title_activity_diary_entry">Yeni Not</string>
     <string name="diary_enty_new_entry">Yeni Not</string>
-    <string name="diary_enty_text">Unutulmaz \'an\'ları kaçırmayın, hemen not almaya başlayın :)</string>
     <string name="title_activity_diary_page">Notlarım</string>
     <string name="title_activity_main">MainActivity</string>
 

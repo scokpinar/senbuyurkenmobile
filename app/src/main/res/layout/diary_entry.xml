@@ -4,22 +4,41 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:focusable="false"
-    android:orientation="vertical"
-    android:showDividers="none">
+    android:orientation="vertical">
 
-    <com.sam.senbuyurkenmobile.MyTextView
-        android:id="@+id/diary_entry_date"
-        style="@style/myTextViewDate"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginLeft="0dp"
-        android:layout_marginRight="0dp"
-        android:layout_marginTop="1dp"
-        android:gravity="right"
-        android:paddingBottom="5dp"
-        android:paddingRight="5dp"
-        android:paddingTop="5dp" />
+        android:orientation="horizontal">
+
+        <com.sam.senbuyurkenmobile.MyTextView
+            android:id="@+id/diary_entry_title"
+            style="@style/myTextViewDate"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:gravity="left"
+            android:paddingBottom="5dp"
+            android:paddingLeft="5dp"
+            android:paddingTop="5dp"
+            android:textSize="12sp"
+            android:textStyle="bold|italic" />
+
+        <com.sam.senbuyurkenmobile.MyTextView
+            android:id="@+id/diary_entry_date"
+            style="@style/myTextViewDate"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="0.5"
+            android:gravity="right"
+            android:paddingBottom="5dp"
+            android:paddingRight="5dp"
+            android:paddingTop="5dp"
+            android:textSize="12sp"
+            android:textStyle="bold|italic" />
+
+    </LinearLayout>
+
 
     <ImageView
         android:id="@+id/diary_entry_image"
@@ -34,14 +53,13 @@
         android:id="@+id/diary_entry_content"
         style="@style/myTextViewNote"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:layout_marginBottom="1dp"
-        android:layout_marginLeft="0dp"
-        android:layout_marginRight="0dp"
         android:gravity="left"
         android:paddingBottom="5dp"
         android:paddingLeft="5dp"
-        android:paddingTop="5dp" />
+        android:paddingTop="5dp"
+        android:textSize="12sp" />
+
 
 </LinearLayout>
