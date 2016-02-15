@@ -9,7 +9,7 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,7 +21,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends AppCompatActivity {
 
     DiaryPageActivity fragmentDiaryPage;
     BabyInfoActivity fragmentBabyInfo;
@@ -101,7 +101,7 @@ public class MainActivity extends ActionBarActivity {
 
         SharedPreferences sp = getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
         TextView userName = (TextView) findViewById(R.id.userName);
-        userName.setText(sp.getString("username", null));
+        userName.setText(sp.getString("userName", null));
 
         getSupportActionBar().setHomeButtonEnabled(true);
 
@@ -135,7 +135,6 @@ public class MainActivity extends ActionBarActivity {
                 }
                 ft.commit();
 
-                //mDrawerLayout.closeDrawer(mDrawerList);
                 mDrawerLayout.closeDrawer(mDrawerPane);
 
             }
