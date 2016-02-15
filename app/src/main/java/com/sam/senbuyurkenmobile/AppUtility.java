@@ -1,9 +1,14 @@
 package com.sam.senbuyurkenmobile;
 
+import android.accounts.Account;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
+
+import com.google.android.gms.auth.GoogleAuthException;
+import com.google.android.gms.auth.GoogleAuthUtil;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -32,10 +37,8 @@ import hugo.weaving.DebugLog;
 public class AppUtility {
 
     public static final String APP_URL = "http://ws.senbuyurken.com/";
-    //public static final String APP_URL = "https://afternoon-citadel-9635.herokuapp.com/";
-    //public static final String APP_URL = "http://176.40.111.86/senbuyurken/";
-
     public static final String existingBucketName = "c79d97161ef8f66e341b304673c24ce7";
+    public static final String GOOGLE_APP_ID = "345121036471-p2rragjceuga9g0vrf04e8ml7komc07m.apps.googleusercontent.com";
 
     //Email Pattern
     private static final String EMAIL_PATTERN =
@@ -103,7 +106,7 @@ public class AppUtility {
     }
 
     @DebugLog
-    public static AWSTempToken getAWSTempToken(String userName, String token) {
+    public static AWSTempToken getAWSTempToken(Context context, String userName, String validUser) {
         AWSTempToken tempToken = new AWSTempToken();
 
         Uri.Builder builder = Uri.parse(AppUtility.APP_URL + "rest/appUtilityRest/getToken").buildUpon();
@@ -112,8 +115,9 @@ public class AppUtility {
         HttpClient client = new DefaultHttpClient();
 
         List<NameValuePair> params = new ArrayList<NameValuePair>();
-        params.add(new BasicNameValuePair("un", userName));
-        params.add(new BasicNameValuePair("t", token));
+        params.add(new BasicNameValuePair("userName", userName));
+        params.add(new BasicNameValuePair("validUser", validUser));
+        params.add(new BasicNameValuePair("token", getGoogleTempToken(context, userName)));
 
         try {
             httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
@@ -136,6 +140,34 @@ public class AppUtility {
         }
         return tempToken;
     }
+
+    @DebugLog
+    public static String getGoogleUId(Context context, String account) {
+        String uid = "";
+        try {
+            uid = GoogleAuthUtil.getAccountId(context, account);
+        } catch (GoogleAuthException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return uid;
+    }
+
+    @DebugLog
+    public static String getGoogleTempToken(Context context, String account) {
+        String scope = "audience:server:client_id:" + GOOGLE_APP_ID;
+        String token = "";
+        try {
+            token = GoogleAuthUtil.getToken(context, new Account(account, "com.google"), scope);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (GoogleAuthException e) {
+            e.printStackTrace();
+        }
+        return token;
+    }
+
 }
 
 
