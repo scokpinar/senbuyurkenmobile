@@ -9,12 +9,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
 
-import com.google.android.gms.auth.GoogleAuthException;
-import com.google.android.gms.auth.GoogleAuthUtil;
-import com.google.android.gms.auth.GooglePlayServicesAvailabilityException;
-import com.google.android.gms.auth.UserRecoverableAuthException;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -32,8 +27,6 @@ import org.apache.http.Header;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-
 /**
  * Created by SametCokpinar on 25/01/15.
  */
@@ -41,14 +34,11 @@ public class LoginActivity extends AppCompatActivity implements
         GoogleApiClient.OnConnectionFailedListener,
         View.OnClickListener {
 
-
     private static final String TAG = "SignInActivity";
     private static final int RC_SIGN_IN = 9001;
 
     private GoogleApiClient mGoogleApiClient;
-    private TextView mStatusTextView;
     private ProgressDialog mProgressDialog;
-
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,6 +48,7 @@ public class LoginActivity extends AppCompatActivity implements
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
+                .requestIdToken(AppUtility.GOOGLE_APP_ID)
                 .build();
 
         mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -97,7 +88,6 @@ public class LoginActivity extends AppCompatActivity implements
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
@@ -105,27 +95,19 @@ public class LoginActivity extends AppCompatActivity implements
         }
     }
 
-
     private void handleSignInResult(GoogleSignInResult result) {
         Log.d(TAG, "handleSignInResult:" + result.isSuccess());
         if (result.isSuccess()) {
             // Signed in successfully, show authenticated UI.
             GoogleSignInAccount acct = result.getSignInAccount();
             String email = acct.getEmail();
-            RetrieveGoogleIdTokenTask task = new RetrieveGoogleIdTokenTask();
+            GoogleTokenValidationTask task = new GoogleTokenValidationTask();
             task.execute(email);
-
-            SharedPreferences sp = getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sp.edit();
-            editor.putString("username", email);
-            editor.apply();
-
         } else {
             // Signed out, show unauthenticated UI.
             //updateUI(false);
         }
     }
-
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
@@ -134,14 +116,12 @@ public class LoginActivity extends AppCompatActivity implements
         Log.d(TAG, "onConnectionFailed:" + connectionResult);
     }
 
-
     private void showProgressDialog() {
         if (mProgressDialog == null) {
             mProgressDialog = new ProgressDialog(this);
             mProgressDialog.setMessage("Loading");
             mProgressDialog.setIndeterminate(true);
         }
-
         mProgressDialog.show();
     }
 
@@ -150,7 +130,6 @@ public class LoginActivity extends AppCompatActivity implements
             mProgressDialog.hide();
         }
     }
-
 
     private void signIn() {
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
@@ -163,7 +142,6 @@ public class LoginActivity extends AppCompatActivity implements
             case R.id.sign_in_button_2:
                 signIn();
                 break;
-
         }
     }
 
@@ -173,48 +151,81 @@ public class LoginActivity extends AppCompatActivity implements
         startActivity(intent);
     }
 
-    private class RetrieveGoogleIdTokenTask extends AsyncTask<String, Void, String> {
+    private class GoogleTokenValidationTask extends AsyncTask<String, Void, String> {
 
         Boolean userCreateResult = false;
         SharedPreferences sp;
+        SharedPreferences.Editor editor;
+        String googleUId;
+        String googleTempToken;
+
+        public GoogleTokenValidationTask() {
+            sp = getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
+        }
 
         protected String doInBackground(String... strings) {
             String account = strings[0];
-            sp = getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
+
+            editor = sp.edit();
+            googleUId = AppUtility.getGoogleUId(LoginActivity.this, account);
+            googleTempToken = AppUtility.getGoogleTempToken(LoginActivity.this, account);
+
+            editor.putString("userId", googleUId);
+            editor.putString("userName", account);
+            editor.apply();
 
             RequestParams params = new RequestParams();
-            params.put("email", account);
-            params.put("user_type", UserType.FREE.getTypeCode());
-            params.put("active", "1");
-            invokeWS(params);
-
-            String homeServerClient = "345121036471-p2rragjceuga9g0vrf04e8ml7komc07m.apps.googleusercontent.com";
-            try {
-                SharedPreferences.Editor editor = sp.edit();
-                editor.putString("uid", GoogleAuthUtil.getAccountId(LoginActivity.this, account));
-                editor.apply();
-                String scope = "audience:server:client_id:" + homeServerClient;
-                return GoogleAuthUtil.getToken(LoginActivity.this, account, scope);
-            } catch (GooglePlayServicesAvailabilityException playEx) {
-                // In this case you could prompt the user to upgrade.
-            } catch (UserRecoverableAuthException userAuthEx) {
-                // This should not occur for ID tokens.
-            } catch (IOException transientEx) {
-                // You could retry in this case.
-            } catch (GoogleAuthException authEx) {
-                // General auth error.
-            }
+            params.put("userName", googleUId);
+            params.put("token", googleTempToken);
+            invokeGoogleTokenValidationWS(params);
             return null;
         }
 
         protected void onPostExecute(String result) {
-            SharedPreferences.Editor editor = sp.edit();
-            editor.putString("token", result);
-            editor.apply();
             navigateToMainActivity();
         }
 
-        public void invokeWS(RequestParams params) {
+        public void invokeGoogleTokenValidationWS(RequestParams params) {
+            SyncHttpClient client = new SyncHttpClient();
+            client.post(AppUtility.APP_URL + "rest/appUtilityRest/googleTokenValidation/", params, new JsonHttpResponseHandler() {
+
+                @Override
+                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                    editor = sp.edit();
+                    try {
+                        if (response.getBoolean("result")) {
+                            editor.putBoolean("validUser", true);
+                            editor.putBoolean("userLoggedIn", true);
+                            editor.apply();
+
+                            RequestParams params = new RequestParams();
+                            params.put("userName", googleUId);
+                            params.put("userType", UserType.FREE.getTypeCode());
+                            params.put("active", "1");
+                            invokeCreateUserWS(params);
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        editor.putBoolean("validUser", false);
+                        editor.putBoolean("userLoggedIn", false);
+                        editor.apply();
+                    }
+                }
+
+                @Override
+                public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject errorResponse) {
+                    if (statusCode == 404) {
+
+                    } else if (statusCode == 500) {
+
+                    } else {
+
+                    }
+                }
+            });
+        }
+
+        public void invokeCreateUserWS(RequestParams params) {
             SyncHttpClient client = new SyncHttpClient();
             client.post(AppUtility.APP_URL + "rest/userRegistrationRest/createUser/", params, new JsonHttpResponseHandler() {
 
@@ -224,17 +235,14 @@ public class LoginActivity extends AppCompatActivity implements
                         userCreateResult = response.getBoolean("result");
                     } catch (JSONException e) {
                         e.printStackTrace();
-
                     }
                 }
 
                 @Override
                 public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject errorResponse) {
                     if (statusCode == 404) {
-                    }
-                    else if (statusCode == 500) {
-                    }
-                    else {
+                    } else if (statusCode == 500) {
+                    } else {
                     }
                 }
             });
@@ -247,5 +255,6 @@ public class LoginActivity extends AppCompatActivity implements
         public void setUserCreateResult(Boolean userCreateResult) {
             this.userCreateResult = userCreateResult;
         }
+
     }
 }
