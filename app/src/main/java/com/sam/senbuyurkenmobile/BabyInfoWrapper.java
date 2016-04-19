@@ -3,8 +3,10 @@ package com.sam.senbuyurkenmobile;
 import java.io.Serializable;
 
 /**
+ *
  * Created by SametCokpinar on 23/02/15.
  */
+
 public class BabyInfoWrapper implements Serializable {
 
     private Integer babyInfoId;
