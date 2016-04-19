@@ -38,6 +38,7 @@ public class AppUtility {
 
     public static final String APP_URL = "http://ws.senbuyurken.com/";
     public static final String existingBucketName = "c79d97161ef8f66e341b304673c24ce7";
+    public static final String existingBucketName4Thumbnail = "c79d97161ef8f66e341b304673c24ce7-thumbnail";
     public static final String GOOGLE_APP_ID = "345121036471-p2rragjceuga9g0vrf04e8ml7komc07m.apps.googleusercontent.com";
 
     //Email Pattern
@@ -46,6 +47,9 @@ public class AppUtility {
                     + "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
     private static Pattern pattern;
     private static Matcher matcher;
+
+    private static AWSTempToken awsTempToken = new AWSTempToken();
+    ;
 
     /**
      * Validate Email with regular expression
@@ -67,7 +71,7 @@ public class AppUtility {
      * @return true for not null and false for null String object
      */
     public static boolean isNotNull(String txt) {
-        return txt != null && txt.trim().length() > 0 ? true : false;
+        return txt != null && txt.trim().length() > 0;
     }
 
     public static boolean comparePasswords(String p1, String p2) {
@@ -107,8 +111,35 @@ public class AppUtility {
 
     @DebugLog
     public static AWSTempToken getAWSTempToken(Context context, String userName, String validUser) {
-        AWSTempToken tempToken = new AWSTempToken();
+        if (awsTempToken.getAccessKeyId() == null || awsTempToken.getExpiration() < System.currentTimeMillis())
+            createAWSTempToken(context, userName, validUser);
+        return awsTempToken;
+    }
 
+    @DebugLog
+    public static String getGoogleUId(Context context, String account) {
+        String uid = "";
+        try {
+            uid = GoogleAuthUtil.getAccountId(context, account);
+        } catch (GoogleAuthException | IOException e) {
+            e.printStackTrace();
+        }
+        return uid;
+    }
+
+    @DebugLog
+    public static String getGoogleTempToken(Context context, String account) {
+        String scope = "audience:server:client_id:" + GOOGLE_APP_ID;
+        String token = "";
+        try {
+            token = GoogleAuthUtil.getToken(context, new Account(account, "com.google"), scope);
+        } catch (IOException | GoogleAuthException e) {
+            e.printStackTrace();
+        }
+        return token;
+    }
+
+    public static void createAWSTempToken(Context context, String userName, String validUser) {
         Uri.Builder builder = Uri.parse(AppUtility.APP_URL + "rest/appUtilityRest/getToken").buildUpon();
 
         HttpPost httpPost = new HttpPost(builder.toString());
@@ -128,44 +159,17 @@ public class AppUtility {
             if (responseStr != null && !responseStr.equals("null") && !responseStr.equals("")) {
                 JSONObject obj = new JSONObject(responseStr);
                 JSONObject credentials = obj.getJSONObject("credentials");
-                tempToken.setAccessKeyId(credentials.getString("accessKeyId"));
-                tempToken.setSecretAccessKey(credentials.getString("secretAccessKey"));
-                tempToken.setSessionToken(credentials.getString("sessionToken"));
-                tempToken.setExpiration(credentials.getLong("expiration"));
+                awsTempToken.setAccessKeyId(credentials.getString("accessKeyId"));
+                awsTempToken.setSecretAccessKey(credentials.getString("secretAccessKey"));
+                awsTempToken.setSessionToken(credentials.getString("sessionToken"));
+                awsTempToken.setExpiration(credentials.getLong("expiration"));
             }
         } catch (IOException e) {
             e.printStackTrace();
         } catch (JSONException e) {
             e.printStackTrace();
         }
-        return tempToken;
-    }
 
-    @DebugLog
-    public static String getGoogleUId(Context context, String account) {
-        String uid = "";
-        try {
-            uid = GoogleAuthUtil.getAccountId(context, account);
-        } catch (GoogleAuthException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return uid;
-    }
-
-    @DebugLog
-    public static String getGoogleTempToken(Context context, String account) {
-        String scope = "audience:server:client_id:" + GOOGLE_APP_ID;
-        String token = "";
-        try {
-            token = GoogleAuthUtil.getToken(context, new Account(account, "com.google"), scope);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (GoogleAuthException e) {
-            e.printStackTrace();
-        }
-        return token;
     }
 
 }
