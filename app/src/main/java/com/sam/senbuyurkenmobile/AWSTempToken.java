@@ -1,8 +1,10 @@
 package com.sam.senbuyurkenmobile;
 
 /**
+ *
  * Created by SametCokpinar on 12/12/15.
  */
+
 public class AWSTempToken {
 
     private String accessKeyId;
