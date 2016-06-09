@@ -41,6 +41,6 @@
         android:layout_marginBottom="10dp"
         android:baselineAlignBottom="true"
         android:gravity="center_horizontal"
-        android:src="@drawable/baby_icons" />
+        android:src="@drawable/logo_icons" />
 
 </RelativeLayout>

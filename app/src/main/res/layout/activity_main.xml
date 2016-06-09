@@ -35,18 +35,18 @@
                 android:layout_alignParentEnd="false"
                 android:adjustViewBounds="true"
                 android:scaleType="fitXY"
-                android:src="@drawable/profile_bg" />
+                android:src="@drawable/ic_profile_bg" />
 
             <TextView
                 android:id="@+id/userName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
-                android:layout_alignParentEnd="true"
-                android:layout_gravity="bottom|right"
+                android:layout_alignParentEnd="false"
+                android:layout_centerHorizontal="true"
+                android:layout_gravity="bottom|center"
                 android:layout_marginBottom="10dp"
-                android:layout_marginRight="10dp"
-                android:textColor="#ffffff"
+                android:textColor="#000000"
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
@@ -55,7 +55,7 @@
 
         <ListView
             android:id="@+id/left_drawer"
-            android:layout_width="240dp"
+            android:layout_width="220dp"
             android:layout_height="match_parent"
             android:layout_below="@+id/profileBox"
             android:background="#FFFFFF"

@@ -2,13 +2,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     style="@style/myTextView_top"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="fill_parent"
     android:focusable="false"
     android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@android:color/white"
         android:orientation="horizontal">
 
         <com.sam.senbuyurkenmobile.MyTextView
@@ -21,7 +22,7 @@
             android:paddingBottom="5dp"
             android:paddingLeft="5dp"
             android:paddingTop="5dp"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:textStyle="bold|italic" />
 
         <com.sam.senbuyurkenmobile.MyTextView
@@ -34,8 +35,23 @@
             android:paddingBottom="5dp"
             android:paddingRight="5dp"
             android:paddingTop="5dp"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:textStyle="bold|italic" />
+
+
+        <ImageButton
+            android:id="@+id/button_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="7dp"
+            android:adjustViewBounds="true"
+            android:background="@android:color/transparent"
+            android:baselineAlignBottom="false"
+            android:cropToPadding="false"
+            android:gravity="center_vertical|center_horizontal"
+            android:scaleType="fitXY"
+            android:src="@drawable/ic_delete" />
+
 
     </LinearLayout>
 
@@ -46,7 +62,6 @@
         android:layout_height="match_parent"
         android:adjustViewBounds="true"
         android:background="#ffffffff"
-        android:minHeight="0dp"
         android:scaleType="fitXY" />
 
     <com.sam.senbuyurkenmobile.MyTextView
@@ -59,7 +74,6 @@
         android:paddingBottom="5dp"
         android:paddingLeft="5dp"
         android:paddingTop="5dp"
-        android:textSize="12sp" />
-
+        android:textSize="14sp" />
 
 </LinearLayout>

@@ -5,6 +5,11 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
 
+
+    <!-- Strings related to RegisterActivity -->
+    <string name="alert_dialog_yes">Evet</string>
+    <string name="alert_dialog_no">Hayır</string>
+
     <!-- Strings related to RegisterActivity -->
     <string name="register_header">Yeni Hesap</string>
 
@@ -13,15 +18,21 @@
     <string name="password2">Şifre Tekrar</string>
     <string name="saveButton">Kaydet</string>
     <string name="cancelButton">Vazgeç</string>
+
+
+    <!-- Messages-->
     <string name="register_success_msg">Kaydınız başarıyla yapılmıştır.</string>
+    <string name="register_fail_msg">Kayıt sırasında hata oluştu.</string>
     <string name="register_existinguser_msg">Kullanıcı sistemde kayıtlıdır.</string>
+    <string name="delete_message">Kayıt silinecektir. Emin misiniz ?</string>
+    <string name="required_fields">Zorunlu alanları doldurunuz. </string>
 
 
     <!-- Diary Entry Page -->
 
     <string name="diary_entry_text">Unutulmaz \'an\'ları kaçırmayın, hemen not almaya başlayın :)</string>
     <string name="diary_entry_text_length">1024</string>
-    <string name="diary_entry_title">Başlık</string>
+    <string name="diary_entry_title">Kısa bir başlık...</string>
 
 
     <!-- Baby Info Page -->

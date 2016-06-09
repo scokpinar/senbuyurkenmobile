@@ -28,7 +28,7 @@
             android:name=".LoginActivity"
             android:configChanges="orientation|keyboardHidden"
 
-            android:label="@string/title_activity_login"></activity>
+            android:label="@string/title_activity_login" />
 
         <activity
             android:name=".LauncherActivity"
@@ -45,15 +45,17 @@
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/title_activity_diary_entry"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustResize|stateHidden"></activity>
+            android:windowSoftInputMode="adjustResize|stateHidden" />
 
         <activity
             android:name=".MainActivity"
-            android:label="@string/title_activity_main"></activity>
+            android:label="@string/title_activity_main" />
 
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="7f89ef7c0d949981eae8b00778a034e572894523" />
+
+
     </application>
 
 </manifest>

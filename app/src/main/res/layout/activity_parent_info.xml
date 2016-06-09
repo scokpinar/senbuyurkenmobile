@@ -28,16 +28,17 @@
             android:showDividers="none">
 
             <TableRow
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content">
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="5dp">
 
-                <Button
+                <ImageView
                     android:id="@+id/mother_photo"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:drawableTop="@drawable/mom"
-                    android:text="@string/photo_upload" />
+                    android:layout_width="125dp"
+                    android:layout_height="125dp"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/mom" />
 
                 <TableLayout
                     android:layout_gravity="center_vertical"
@@ -102,16 +103,17 @@
 
 
             <TableRow
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content">
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingTop="5dp">
 
-                <Button
+                <ImageView
                     android:id="@+id/father_photo"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:drawableTop="@drawable/dad"
-                    android:text="@string/photo_upload" />
+                    android:layout_width="125dp"
+                    android:layout_height="125dp"
+                    android:adjustViewBounds="true"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/dad" />
 
                 <TableLayout
                     android:layout_gravity="center_vertical"

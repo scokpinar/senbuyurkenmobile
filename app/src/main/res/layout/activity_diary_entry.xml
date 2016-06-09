@@ -3,8 +3,7 @@
     android:layout_height="match_parent"
     android:fillViewport="true">
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
@@ -12,15 +11,13 @@
         android:paddingBottom="@dimen/activity_vertical_margin"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        tools:context="com.sam.senbuyurkenmobile.DiaryEntryActivity">
+        android:paddingTop="@dimen/activity_vertical_margin">
 
         <TableLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignParentEnd="true"
             android:layout_gravity="center_horizontal"
-            android:nestedScrollingEnabled="true"
             android:showDividers="none"
             android:stretchColumns="0"
             android:weightSum="30">
@@ -49,7 +46,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_weight="27"
-                android:gravity="center_vertical"
+                android:gravity="center_vertical|center_horizontal"
                 android:paddingTop="5dp">
 
                 <EditText
@@ -65,7 +62,7 @@
                     android:minHeight="100dp"
                     android:minLines="10"
                     android:paddingLeft="5dp"
-                    android:scrollbars="horizontal|vertical" />
+                    android:scrollbars="vertical" />
             </TableRow>
 
             <TableRow
@@ -76,9 +73,8 @@
 
                 <ImageView
                     android:id="@+id/imageView"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_weight="1"
                     android:adjustViewBounds="true"
                     android:scaleType="fitXY" />
             </TableRow>
@@ -86,29 +82,36 @@
             <TableRow
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                android:layout_gravity="center_vertical"
                 android:layout_weight="1"
-                android:paddingTop="5dp"
                 android:weightSum="1">
 
                 <GridLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_gravity="center_vertical"
+                    android:layout_gravity="top"
+                    android:alignmentMode="alignBounds"
                     android:columnCount="5"
-                    android:rowCount="1">
+                    android:gravity="center_vertical|center_horizontal"
+                    android:rowCount="1"
+                    android:useDefaultMargins="true">
 
                     <ImageView
                         android:id="@+id/icon_camera"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_column="0"
+                        android:layout_gravity="center_vertical"
                         android:layout_marginLeft="10dp"
                         android:adjustViewBounds="true"
+                        android:gravity="center_vertical|center_horizontal"
                         android:src="@drawable/ic_camera" />
 
                     <TextView
                         android:id="@+id/char_count"
                         android:layout_column="3"
+                        android:layout_gravity="center_vertical"
+                        android:gravity="center_vertical|center_horizontal"
                         android:text="@string/diary_entry_text_length" />
 
                     <Button
@@ -117,6 +120,7 @@
                         android:layout_width="60dp"
                         android:layout_height="30dp"
                         android:layout_column="4"
+                        android:layout_gravity="center_vertical"
                         android:layout_marginLeft="10dp"
                         android:layout_marginRight="10dp"
                         android:background="@drawable/my_rounded_button"
