@@ -31,9 +31,9 @@ public class BabyInfoWrapper implements Serializable {
 
     private String pediatricianDoctor;
 
-    private Integer birthWeight = 0;
+    private int birthWeight;
 
-    private Integer birthLength = 0;
+    private int birthLength;
 
     private String photoURL;
 

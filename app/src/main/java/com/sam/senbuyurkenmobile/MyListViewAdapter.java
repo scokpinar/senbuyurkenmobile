@@ -39,7 +39,15 @@ public class MyListViewAdapter extends BaseAdapter {
         return position;
     }
 
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public List<DiaryEntryWrapper> getData() {
+        return data;
+    }
+
+    public void setData(List<DiaryEntryWrapper> data) {
+        this.data = data;
+    }
+
+    public View getView(final int position, View convertView, ViewGroup parent) {
 
         View vi = convertView;
 
@@ -58,7 +66,7 @@ public class MyListViewAdapter extends BaseAdapter {
             holder = (ViewHolder) vi.getTag();
         }
 
-        DiaryEntryWrapper dew = data.get(position);
+        final DiaryEntryWrapper dew = data.get(position);
 
         if (dew != null) {
             holder.diary_entry_title.setText(dew.getEntry_title());
@@ -72,6 +80,15 @@ public class MyListViewAdapter extends BaseAdapter {
             }
             holder.diary_entry_content.setText(dew.getEntry_content());
         }
+
+        ImageView deleteButton = (ImageView) vi.findViewById(R.id.button_delete);
+        deleteButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                DiaryPageActivity fragment_1 = (DiaryPageActivity) activity.getFragmentManager().findFragmentByTag("fragment_1");
+                fragment_1.deleteProcess(dew.getId(), position);
+            }
+        });
+
         return vi;
     }
 

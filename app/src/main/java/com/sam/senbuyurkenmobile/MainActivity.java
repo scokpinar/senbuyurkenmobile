@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
@@ -58,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
         fragments = new Fragment[]{fragmentDiaryPage, fragmentBabyInfo, fragmentParentInfo, fragmentAppInfo};
 
         getSupportActionBar().setTitle(drawerTitle);
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu);
 
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerPane = (RelativeLayout) findViewById(R.id.drawerPane);
@@ -75,8 +77,11 @@ public class MainActivity extends AppCompatActivity {
             }
 
             public void onDrawerOpened(View drawerView) {
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(drawerView.getWindowToken(), 0);
                 getSupportActionBar().setTitle(drawerTitle);
                 invalidateOptionsMenu();
+
             }
 
         };
@@ -139,7 +144,10 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+
+
     }
+
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -167,4 +175,6 @@ public class MainActivity extends AppCompatActivity {
         //getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
+
+
 }

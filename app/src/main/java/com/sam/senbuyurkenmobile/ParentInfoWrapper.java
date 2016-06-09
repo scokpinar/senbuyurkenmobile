@@ -1,5 +1,7 @@
 package com.sam.senbuyurkenmobile;
 
+import android.graphics.Bitmap;
+
 import java.io.Serializable;
 
 /**
@@ -15,9 +17,17 @@ public class ParentInfoWrapper implements Serializable {
 
     private String mother_surname;
 
+    private Bitmap mother_photo;
+
+    private String mother_photo_name;
+
     private String father_name;
 
     private String father_surname;
+
+    private Bitmap father_photo;
+
+    private String father_photo_name;
 
     private String wedding_anniversary;
 
@@ -53,6 +63,22 @@ public class ParentInfoWrapper implements Serializable {
         this.mother_surname = mother_surname;
     }
 
+    public Bitmap getMother_photo() {
+        return mother_photo;
+    }
+
+    public void setMother_photo(Bitmap mother_photo) {
+        this.mother_photo = mother_photo;
+    }
+
+    public String getMother_photo_name() {
+        return mother_photo_name;
+    }
+
+    public void setMother_photo_name(String mother_photo_name) {
+        this.mother_photo_name = mother_photo_name;
+    }
+
     public String getFather_name() {
         return father_name;
     }
@@ -67,6 +93,22 @@ public class ParentInfoWrapper implements Serializable {
 
     public void setFather_surname(String father_surname) {
         this.father_surname = father_surname;
+    }
+
+    public Bitmap getFather_photo() {
+        return father_photo;
+    }
+
+    public void setFather_photo(Bitmap father_photo) {
+        this.father_photo = father_photo;
+    }
+
+    public String getFather_photo_name() {
+        return father_photo_name;
+    }
+
+    public void setFather_photo_name(String father_photo_name) {
+        this.father_photo_name = father_photo_name;
     }
 
     public String getWedding_anniversary() {

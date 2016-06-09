@@ -9,12 +9,21 @@ import java.io.Serializable;
  */
 public class DiaryEntryWrapper implements Serializable {
 
+    Integer id;
     String entry_title;
     String entry_content;
     String entry_date;
     Bitmap image;
     Boolean hasImage = false;
 
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public String getEntry_title() {
         return entry_title;
@@ -54,5 +63,21 @@ public class DiaryEntryWrapper implements Serializable {
 
     public void setHasImage(Boolean hasImage) {
         this.hasImage = hasImage;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        DiaryEntryWrapper that = (DiaryEntryWrapper) o;
+
+        return id.equals(that.id);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
     }
 }

@@ -4,26 +4,27 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.AlertDialog;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
-import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
@@ -32,10 +33,10 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.util.IOUtils;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
@@ -46,19 +47,19 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
 import hugo.weaving.DebugLog;
 
-public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
+public class DiaryPageActivity extends Fragment implements MyListAdapterListener {
 
     private ListView de_list_view;
+    //private SwipeRefreshLayout swipeLayout;
     private ProgressDialog progressDialog;
-    private SwipeRefreshLayout swipeLayout;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -71,19 +72,10 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
             StrictMode.setThreadPolicy(policy);
         }
 
-        swipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
-        swipeLayout.setBackgroundColor(Color.TRANSPARENT);
-        swipeLayout.setRefreshing(false);
-        swipeLayout.setOnRefreshListener(this);
-
-        ImageButton newNote = (ImageButton) view.findViewById(R.id.new_note);
-        newNote.bringToFront();
-        newNote.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                navigateToDiaryEntryActivity();
-            }
-        });
+        //swipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
+        //swipeLayout.setBackgroundColor(Color.TRANSPARENT);
+        //swipeLayout.setRefreshing(true);
+        //swipeLayout.setOnRefreshListener(this);
 
         de_list_view = (ListView) view.findViewById(R.id.de_listview);
 
@@ -97,12 +89,12 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
 
             @Override
             public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                if (de_list_view.getChildCount() == 0)
-                    swipeLayout.setEnabled(true);
-                else if (firstVisibleItem == 0 && visibleItemCount > 0 && de_list_view.getChildAt(0).getTop() >= 0)
-                    swipeLayout.setEnabled(true);
-                else
-                    swipeLayout.setEnabled(false);
+                //if (de_list_view.getChildCount() == 0)
+                    //swipeLayout.setEnabled(true);
+                //else if (firstVisibleItem == 0 && visibleItemCount > 0 && de_list_view.getChildAt(0).getTop() >= 0)
+                    //swipeLayout.setEnabled(true);
+                //else
+                    //swipeLayout.setEnabled(false);
             }
         });
 
@@ -130,9 +122,15 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        setHasOptionsMenu(true);
 
         if (savedInstanceState == null) {
             DiaryEntryFetchTask deft = new DiaryEntryFetchTask();
@@ -140,20 +138,18 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
         }
     }
 
-    @Override
     public void onRefresh() {
-        swipeLayout.setRefreshing(false);
-        de_list_view.setAdapter(null);
+        //swipeLayout.setRefreshing(true);
+        //de_list_view.setAdapter(null);
         DiaryEntryFetchTask deft = new DiaryEntryFetchTask();
         deft.execute();
     }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle presses on the action bar items
         switch (item.getItemId()) {
-            case R.id.action_diary_entry:
+            case R.id.action_new_post:
                 navigateToDiaryEntryActivity();
                 return true;
             case R.id.action_settings:
@@ -164,9 +160,18 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.menu_new_entry, menu);
+        MenuItem item = menu.findItem(R.id.action_new_post);
+        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        super.onCreateOptionsMenu(menu, inflater);
+
+    }
+
+    @Override
     public void onDestroy() {
-        if (de_list_view != null)
-            de_list_view.setAdapter(null);
+        //if (de_list_view != null)
+        //    de_list_view.setAdapter(null);
         super.onDestroy();
     }
 
@@ -181,6 +186,80 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
         startActivity(intent);
     }
 
+    @Override
+    public void deleteProcess(final Integer entryId, final int position) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setMessage(R.string.delete_message);
+        builder.setPositiveButton(R.string.alert_dialog_yes, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+
+                MyListViewAdapter adapter = (MyListViewAdapter) de_list_view.getAdapter();
+                List<DiaryEntryWrapper> data = adapter.getData();
+                data.remove(position);
+                adapter.setData(data);
+                adapter.notifyDataSetChanged();
+
+                SharedPreferences sp = getActivity().getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
+                List<NameValuePair> params = new ArrayList<NameValuePair>();
+                final String userName = sp.getString("userName", null);
+                params.add(new BasicNameValuePair("entryId", Integer.toString(entryId)));
+                //todo: Token SharedPreferences den alınacak.
+                //params.add(new BasicNameValuePair("token", AppUtility.getGoogleTempToken(getActivity(), userName)));
+                params.add(new BasicNameValuePair("validUser", sp.getBoolean("validUser", false) + ""));
+                invokeDeleteWS(params);
+            }
+        });
+        builder.setNegativeButton(R.string.alert_dialog_no, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.dismiss();
+            }
+        });
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+
+    public void invokeDeleteWS(List<NameValuePair> params) {
+
+        Uri.Builder builder = Uri.parse(AppUtility.APP_URL + "rest/diaryEntryRest/deleteDiaryEntry").buildUpon();
+
+        HttpPost httpPost = new HttpPost(builder.toString());
+        HttpClient client = new DefaultHttpClient();
+
+        try {
+            httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+            HttpResponse response = client.execute(httpPost);
+
+            String responseStr = EntityUtils.toString(response.getEntity());
+
+            if (responseStr != null && !responseStr.equals("null") && !responseStr.equals("")) {
+                JSONObject obj = new JSONObject(responseStr);
+
+                if (obj.getBoolean("result")) {
+                    Toast.makeText(getActivity().getApplicationContext(), "Kayıt silindi: " + params.get(0).getValue(), Toast.LENGTH_LONG).show();
+                }
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private AmazonS3 getAWS3Client(String userName, String validUser) {
+        AWSTempToken awsTempToken = AppUtility.getAWSTempToken(getActivity().getApplicationContext(), userName, validUser);
+        BasicSessionCredentials basicSessionCredentials =
+                new BasicSessionCredentials(awsTempToken.getAccessKeyId(),
+                        awsTempToken.getSecretAccessKey(),
+                        awsTempToken.getSessionToken());
+        return new AmazonS3Client(basicSessionCredentials);
+    }
+
     class DiaryEntryFetchTask extends AsyncTask<String, Void, List<DiaryEntryWrapper>> {
 
         private List<DiaryEntryWrapper> list = new ArrayList<>();
@@ -188,7 +267,10 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
 
         @Override
         protected void onPreExecute() {
-            progressDialog = ProgressDialog.show(getActivity(), null, null, true, false);
+            //if (swipeLayout != null)
+                //swipeLayout.setRefreshing(true);
+            //else
+                progressDialog = ProgressDialog.show(getActivity(), null, null, true, false);
             progressDialog.setContentView(R.layout.progress_layout);
 
         }
@@ -199,7 +281,10 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
             MyListViewAdapter adapter = new MyListViewAdapter(a, list);
             de_list_view = (ListView) a.findViewById(R.id.de_listview);
             de_list_view.setAdapter(adapter);
-            progressDialog.dismiss();
+            if (progressDialog != null)
+                progressDialog.dismiss();
+            //if (swipeLayout != null)
+            //    swipeLayout.setRefreshing(false);
         }
 
         protected List<DiaryEntryWrapper> doInBackground(String... urls) {
@@ -226,12 +311,7 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
             SharedPreferences sp = getActivity().getApplicationContext().getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
             String subFolder = sp.getString("userId", "") + "/";
 
-            AWSTempToken awsTempToken = AppUtility.getAWSTempToken(getActivity().getApplicationContext(), params.get(0).getValue(), params.get(2).getValue());
-            BasicSessionCredentials basicSessionCredentials =
-                    new BasicSessionCredentials(awsTempToken.getAccessKeyId(),
-                            awsTempToken.getSecretAccessKey(),
-                            awsTempToken.getSessionToken());
-            AmazonS3 s3Client = new AmazonS3Client(basicSessionCredentials);
+            AmazonS3 s3Client = getAWS3Client(params.get(0).getValue(), params.get(2).getValue());
 
             try {
                 httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
@@ -242,36 +322,73 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
                 if (responseStr != null && !responseStr.equals("null") && !responseStr.equals("")) {
 
                     JSONArray values = new JSONArray(responseStr);
+                    MyListViewAdapter adapter = null;
+
 
                     for (int i = 0; i < values.length(); i++) {
                         JSONObject o = (JSONObject) values.get(i);
 
-                        DiaryEntryWrapper dew = new DiaryEntryWrapper();
-                        dew.setEntry_title(o.getString("entry_title"));
-                        dew.setEntry_content(o.getString("entry_content"));
-                        dew.setEntry_date(o.getString("entry_date"));
-                        if (o.getString("photo_url") != null && !o.getString("photo_url").equals("null")) {
-                            InputStream inputStream = loadFromAWSS3(o.getString("photo_url"), subFolder, s3Client);
-                            //todo: Image not found gibi bir mesaj koymamız gerekiyor.
-                            if (inputStream != null) {
-                                byte[] data = IOUtils.toByteArray(inputStream);
-                                ByteArrayInputStream bin = new ByteArrayInputStream(data);
-                                Bitmap bm = loadFast(bin);
-                                dew.setImage(bm);
-                                dew.setHasImage(true);
-                            }
-                        } else {
-                            dew.setImage(null);
-                            dew.setHasImage(false);
-                        }
-                        list.add(dew);
-                    }
-                }
 
+                        if (de_list_view != null)
+                            adapter = (MyListViewAdapter) de_list_view.getAdapter();
+
+                        DiaryEntryWrapper dew = new DiaryEntryWrapper();
+                        dew.setId(o.getInt("diary_entry_id"));
+
+                        if (adapter == null) {
+                            dew.setEntry_title(o.getString("entry_title"));
+                            dew.setEntry_content(o.getString("entry_content"));
+                            dew.setEntry_date(o.getString("entry_date"));
+                            if (o.getString("photo_url") != null && !o.getString("photo_url").equals("null")) {
+                                InputStream inputStream = loadFromAWSS3(o.getString("photo_url"), subFolder, s3Client);
+                                //todo: Image not found gibi bir mesaj koymamız gerekiyor.
+                                if (inputStream != null) {
+                                    //byte[] data = IOUtils.toByteArray(inputStream);
+                                    //ByteArrayInputStream bin = new ByteArrayInputStream(data);
+                                    //Bitmap bm = loadFast(bin);
+                                    dew.setImage(BitmapFactory.decodeStream(inputStream));
+                                    dew.setHasImage(true);
+                                }
+                            } else {
+                                dew.setImage(null);
+                                dew.setHasImage(false);
+                            }
+
+                            list.add(dew);
+                        }
+
+                        if (adapter != null) {
+                            list = adapter.getData();
+                            if (!list.contains(dew)) {
+
+                                dew.setEntry_title(o.getString("entry_title"));
+                                dew.setEntry_content(o.getString("entry_content"));
+                                dew.setEntry_date(o.getString("entry_date"));
+                                if (o.getString("photo_url") != null && !o.getString("photo_url").equals("null")) {
+                                    InputStream inputStream = loadFromAWSS3(o.getString("photo_url"), subFolder, s3Client);
+                                    //todo: Image not found gibi bir mesaj koymamız gerekiyor.
+                                    if (inputStream != null) {
+                                        //byte[] data = IOUtils.toByteArray(inputStream);
+                                        //ByteArrayInputStream bin = new ByteArrayInputStream(data);
+                                        //Bitmap bm = loadFast(bin);
+                                        dew.setImage(BitmapFactory.decodeStream(inputStream));
+                                        dew.setHasImage(true);
+                                    }
+                                } else {
+                                    dew.setImage(null);
+                                    dew.setHasImage(false);
+                                }
+
+                                list.add(dew);
+                            }
+                        }
+                    }
+
+
+                }
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
-
         }
 
         @DebugLog
@@ -280,7 +397,7 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
                 System.out.println("Getting objects from S3 as stream\n");
 
                 S3Object object = s3Client.getObject(new GetObjectRequest(
-                        AppUtility.existingBucketName, subFolder + photoURL));
+                        AppUtility.existingBucketName4Thumbnail, subFolder + "medium/" + photoURL));
                 return object.getObjectContent();
 
             } catch (AmazonServiceException ase) {
@@ -304,40 +421,7 @@ public class DiaryPageActivity extends Fragment implements SwipeRefreshLayout.On
             return null;
         }
 
-        @DebugLog
-        private Bitmap loadFast(ByteArrayInputStream byteArrayInputStream) {
-            int DESIRED_MAX_SIZE = 1080;
-
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-
-            BitmapFactory.decodeStream(byteArrayInputStream, null, options);
-
-            int h = options.outHeight;
-            int w = options.outWidth;
-
-            byteArrayInputStream.reset();
-
-            int sampling = 1;
-
-            if (h > DESIRED_MAX_SIZE || w > DESIRED_MAX_SIZE) {
-
-                final int halfHeight = h / 2;
-                final int halfWidth = w / 2;
-
-                while ((halfHeight / sampling) > DESIRED_MAX_SIZE
-                        && (halfWidth / sampling) > DESIRED_MAX_SIZE) {
-                    sampling *= 2;
-                }
-            }
-
-            options.inSampleSize = sampling;
-            options.inJustDecodeBounds = false;
-            options.inPreferredConfig = Bitmap.Config.RGB_565;
-            options.inDither = true;
-
-            return BitmapFactory.decodeStream(byteArrayInputStream, null, options);
-
-        }
     }
+
+
 }

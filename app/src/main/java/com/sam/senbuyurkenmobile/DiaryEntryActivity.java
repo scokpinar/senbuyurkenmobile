@@ -225,6 +225,7 @@ public class DiaryEntryActivity extends Activity {
         new SaveTask().execute(params);
     }
 
+
     @DebugLog
     public void invokeWS(List<NameValuePair> params) {
         Uri.Builder builder = Uri.parse(AppUtility.APP_URL + "rest/diaryEntryRest/createDiaryEntry").buildUpon();
@@ -244,7 +245,7 @@ public class DiaryEntryActivity extends Activity {
 
                 if (obj.getBoolean("result") && selectedImage != null) {
                     Bitmap bitmap = loadFast(AppUtility.getPathFromUri(getContentResolver(), selectedImage));
-                    File resizedFile = new File(android.os.Environment.getExternalStorageDirectory(), params.get(7).getValue() + ".png");
+                    File resizedFile = new File(android.os.Environment.getExternalStorageDirectory(), params.get(5).getValue() + ".png");
                     OutputStream fOut;
                     try {
                         fOut = new BufferedOutputStream(new FileOutputStream(resizedFile));
@@ -255,7 +256,7 @@ public class DiaryEntryActivity extends Activity {
 
                     } catch (Exception e) {
                     }
-                    saveToAWSS3(resizedFile, params.get(7).getValue());
+                    saveToAWSS3(resizedFile, params.get(5).getValue());
                 }
             }
         } catch (IOException e) {
@@ -329,12 +330,7 @@ public class DiaryEntryActivity extends Activity {
 
         String subFolderOriginal = sp.getString("userId", "") + "/";
 
-        AWSTempToken awsTempToken = AppUtility.getAWSTempToken(getApplicationContext(), sp.getString("userName", null), (sp.getBoolean("validUser", false) + ""));
-        BasicSessionCredentials basicSessionCredentials =
-                new BasicSessionCredentials(awsTempToken.getAccessKeyId(),
-                        awsTempToken.getSecretAccessKey(),
-                        awsTempToken.getSessionToken());
-        AmazonS3 s3Client = new AmazonS3Client(basicSessionCredentials);
+        AmazonS3 s3Client = getAWS3Client(sp.getString("userName", null), (sp.getBoolean("validUser", false) + ""));
 
         try {
             System.out.println("Uploading a new object to S3 from a file\n");
@@ -365,6 +361,14 @@ public class DiaryEntryActivity extends Activity {
         }
     }
 
+    public AmazonS3 getAWS3Client(String userName, String validUser) {
+        AWSTempToken awsTempToken = AppUtility.getAWSTempToken(getApplicationContext(), userName, validUser);
+        BasicSessionCredentials basicSessionCredentials =
+                new BasicSessionCredentials(awsTempToken.getAccessKeyId(),
+                        awsTempToken.getSecretAccessKey(),
+                        awsTempToken.getSessionToken());
+        return new AmazonS3Client(basicSessionCredentials);
+    }
 
     class SaveTask extends AsyncTask<List<NameValuePair>, Void, Boolean> {
         ProgressDialog progressDialog;

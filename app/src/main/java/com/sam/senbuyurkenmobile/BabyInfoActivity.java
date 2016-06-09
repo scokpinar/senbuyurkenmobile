@@ -6,6 +6,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -17,6 +18,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -31,7 +33,6 @@ import com.loopj.android.http.ResponseHandlerInterface;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
@@ -42,13 +43,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by SametCokpinar on 08/03/15.
  */
+
 public class BabyInfoActivity extends Fragment {
 
     private BabyInfoWrapper babyInfo = new BabyInfoWrapper();
@@ -144,6 +145,19 @@ public class BabyInfoActivity extends Fragment {
         SharedPreferences sp = activity.getApplicationContext().getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
         String email = sp.getString("userName", null);
 
+        TextView baby_name = (TextView) activity.findViewById(R.id.baby_name);
+        baby_name.setTextColor(Color.BLACK);
+
+        TextView baby_surname = (TextView) activity.findViewById(R.id.baby_surname);
+        baby_surname.setTextColor(Color.BLACK);
+
+        TextView birth_Date = (TextView) activity.findViewById(R.id.birthDate);
+        birth_Date.setTextColor(Color.BLACK);
+
+        TextView birth_Hour = (TextView) activity.findViewById(R.id.birthHour);
+        birth_Hour.setTextColor(Color.BLACK);
+
+
         String name = ((EditText) activity.findViewById(R.id.name)).getText().toString();
         String surname = ((EditText) activity.findViewById(R.id.surname)).getText().toString();
         String birthDate = ((EditText) activity.findViewById(R.id.birthDate)).getText().toString();
@@ -155,13 +169,9 @@ public class BabyInfoActivity extends Fragment {
         String gynecologyDoctor = ((EditText) activity.findViewById(R.id.gynecologyDoctor)).getText().toString();
         String pediatricianDoctor = ((EditText) activity.findViewById(R.id.pediatricianDoctor)).getText().toString();
 
-        // Instantiate Http Request Param Object
         RequestParams params = new RequestParams();
-        // When Name Edit View, Email Edit View and Password Edit View have values other than Null
         if (AppUtility.isNotNull(name) && AppUtility.isNotNull(surname) && AppUtility.isNotNull(gender)
-                && AppUtility.isNotNull(birthDate)) {
-
-            // Put http parameters
+                && AppUtility.isNotNull(birthDate) && AppUtility.isNotNull(birthHour)) {
             params.put("email", email);
             params.put("name", name);
             params.put("surname", surname);
@@ -175,12 +185,28 @@ public class BabyInfoActivity extends Fragment {
             params.put("gynecology_doctor", gynecologyDoctor);
             params.put("pediatrician_doctor", pediatricianDoctor);
 
-            // Invoke RESTFull Web Service with Http parameters
-            invokeWS(activity, params);
-        }
-        // When any of the Edit View control left blank
-        else {
-            Toast.makeText(activity.getApplicationContext().getApplicationContext(), "Please fill the fields", Toast.LENGTH_LONG).show();
+            invokeWS(params);
+        } else {
+            InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+
+            if (name.equals("")) {
+                baby_name.setTextColor(Color.RED);
+
+            }
+            if (surname.equals("")) {
+                baby_surname.setTextColor(Color.RED);
+
+            }
+            if (birthDate.equals("")) {
+                birth_Date.setTextColor(Color.RED);
+
+            }
+            if (birthHour.equals("")) {
+                birth_Hour.setTextColor(Color.RED);
+
+            }
+            Toast.makeText(activity.getApplicationContext(), activity.getApplicationContext().getText(R.string.required_fields), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -189,10 +215,14 @@ public class BabyInfoActivity extends Fragment {
         name.setText(babyInfo.getName());
         TextView surname = ((EditText) view.findViewById(R.id.surname));
         surname.setText(babyInfo.getSurname());
-        if (babyInfo.getGender() != null && babyInfo.getGender().equals("E"))
+        if (babyInfo.getGender() != null && babyInfo.getGender().equals("E")) {
+            gender = "E";
             maleButton.setImageDrawable(getResources().getDrawable(R.drawable.baby_boy_selected));
-        if (babyInfo.getGender() != null && babyInfo.getGender().equals("K"))
+        }
+        if (babyInfo.getGender() != null && babyInfo.getGender().equals("K")) {
+            gender = "K";
             femaleButton.setImageDrawable(getResources().getDrawable(R.drawable.baby_girl_selected));
+        }
         TextView birthDate = ((EditText) view.findViewById(R.id.birthDate));
         birthDate.setText(babyInfo.getBirthDate());
         TextView birthHour = ((EditText) view.findViewById(R.id.birthHour));
@@ -214,11 +244,12 @@ public class BabyInfoActivity extends Fragment {
     /**
      * Method that performs RESTful webservice invocations
      *
-     * @param view
      * @param params
      */
 
-    public void invokeWS(final Activity view, RequestParams params) {
+    public void invokeWS(RequestParams params) {
+        final Context ac = getActivity().getApplicationContext();
+
         AsyncHttpClient client = new AsyncHttpClient();
         client.post(AppUtility.APP_URL + "rest/babyRegistrationRest/createBabyInfo", params, new AsyncHttpResponseHandler() {
 
@@ -231,13 +262,13 @@ public class BabyInfoActivity extends Fragment {
                 try {
                     JSONObject obj = new JSONObject(new String(response));
                     if (obj.getBoolean("result")) {
-                        Toast.makeText(getView().getContext().getApplicationContext(), getView().getContext().getApplicationContext().getString(R.string.register_success_msg), Toast.LENGTH_LONG).show();
+                        Toast.makeText(ac, ac.getString(R.string.register_success_msg), Toast.LENGTH_LONG).show();
 
                     } else {
-                        Toast.makeText(getView().getContext().getApplicationContext(), getView().getContext().getApplicationContext().getString(R.string.register_existinguser_msg), Toast.LENGTH_LONG).show();
+                        Toast.makeText(ac, ac.getString(R.string.register_fail_msg), Toast.LENGTH_LONG).show();
                     }
                 } catch (JSONException e) {
-                    Toast.makeText(getView().getContext().getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+                    Toast.makeText(ac, ac.getString(R.string.register_fail_msg), Toast.LENGTH_LONG).show();
                     e.printStackTrace();
 
                 }
@@ -246,11 +277,11 @@ public class BabyInfoActivity extends Fragment {
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
                 if (statusCode == 404) {
-                    Toast.makeText(getView().getContext().getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
+                    Toast.makeText(ac, ac.getString(R.string.register_fail_msg), Toast.LENGTH_LONG).show();
                 } else if (statusCode == 500) {
-                    Toast.makeText(getView().getContext().getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
+                    Toast.makeText(ac, ac.getString(R.string.register_fail_msg), Toast.LENGTH_LONG).show();
                 } else {
-                    Toast.makeText(getView().getContext().getApplicationContext(), "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet or remote server is not up and running]", Toast.LENGTH_LONG).show();
+                    Toast.makeText(ac, ac.getString(R.string.register_fail_msg), Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -317,13 +348,7 @@ public class BabyInfoActivity extends Fragment {
                     }
                 }
 
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            } catch (ClientProtocolException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
+            } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
 

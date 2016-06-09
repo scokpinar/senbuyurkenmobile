@@ -74,6 +74,10 @@ public class AppUtility {
         return txt != null && txt.trim().length() > 0;
     }
 
+    public static boolean isNull(String txt) {
+        return txt == null;
+    }
+
     public static boolean comparePasswords(String p1, String p2) {
         return p1.equals(p2);
 

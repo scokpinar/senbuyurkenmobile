@@ -25,13 +25,16 @@ public class LauncherActivity extends Activity {
 
                 try {
                     // Thread will sleep for 0.5 seconds
-                    sleep(1 * 500);
+                    sleep(500);
 
                     SharedPreferences sp = getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
                     boolean userLoggedIn = sp.getBoolean("userLoggedIn", false);
+                    String userName = sp.getString("userName", "");
+                    Boolean validUser = sp.getBoolean("validUser", false);
 
                     if (userLoggedIn) {
                         Intent i = new Intent(getBaseContext(), MainActivity.class);
+                        AppUtility.createAWSTempToken(getApplicationContext(), userName, validUser + "");
                         startActivity(i);
                     } else {
                         Intent i = new Intent(getBaseContext(), LoginActivity.class);
