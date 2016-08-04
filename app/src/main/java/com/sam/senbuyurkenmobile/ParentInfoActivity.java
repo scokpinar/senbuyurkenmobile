@@ -18,7 +18,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.StrictMode;
-import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -166,14 +165,15 @@ public class ParentInfoActivity extends Fragment {
 
     private void selectImage(final int selectedImageView) {
 
-        final CharSequence[] options = {"Fotoğraf Çek", "Galeri", "İptal"};
+        //final CharSequence[] options = {"Fotoğraf Çek", "Galeri", "İptal"};
+        final CharSequence[] options = {"Galeri", "İptal"};
 
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Fotoğraf Seç");
         builder.setItems(options, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int item) {
-                if (options[item].equals("Fotoğraf Çek")) {
+                /*if (options[item].equals("Fotoğraf Çek")) {
                     Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                     File f = new File(android.os.Environment.getExternalStorageDirectory(), "temp.jpg");
                     if (selectedImageView == 1) {
@@ -185,7 +185,8 @@ public class ParentInfoActivity extends Fragment {
 
                     }
                     startActivityForResult(intent, PICK_FROM_CAMERA);
-                } else if (options[item].equals("Galeri")) {
+                } else*/
+                if (options[item].equals("Galeri")) {
 
                     if (selectedImageView == 1) {
                         mImageCaptureUri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
@@ -213,9 +214,9 @@ public class ParentInfoActivity extends Fragment {
         if (resultCode != Activity.RESULT_OK) return;
 
         switch (requestCode) {
-            case PICK_FROM_CAMERA:
+            /*case PICK_FROM_CAMERA:
                 doCrop(selectedImageView);
-                break;
+                break;*/
 
             case PICK_FROM_FILE:
                 if (selectedImageView == 1) {

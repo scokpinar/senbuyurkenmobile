@@ -199,7 +199,7 @@ public class LoginActivity extends AppCompatActivity implements
                             editor.apply();
 
                             RequestParams params = new RequestParams();
-                            params.put("userName", googleUId);
+                            params.put("userName", sp.getString("userName", ""));
                             params.put("userType", UserType.FREE.getTypeCode());
                             params.put("active", "1");
                             invokeCreateUserWS(params);

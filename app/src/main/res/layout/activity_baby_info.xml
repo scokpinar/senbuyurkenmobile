@@ -34,16 +34,19 @@
 
                 <ImageButton
                     android:id="@+id/gender_male"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
+                    android:adjustViewBounds="true"
+                    android:background="@android:color/transparent"
+                    android:cropToPadding="false"
+                    android:elevation="0dp"
                     android:src="@drawable/baby_boy_not_selected" />
 
                 <ImageButton
                     android:id="@+id/gender_female"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
                     android:src="@drawable/baby_girl_not_selected" />
 
             </TableRow>

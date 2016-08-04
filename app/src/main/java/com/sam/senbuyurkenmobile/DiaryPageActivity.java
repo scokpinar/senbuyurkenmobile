@@ -22,9 +22,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
@@ -33,6 +31,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -58,7 +57,6 @@ import hugo.weaving.DebugLog;
 public class DiaryPageActivity extends Fragment implements MyListAdapterListener {
 
     private ListView de_list_view;
-    //private SwipeRefreshLayout swipeLayout;
     private ProgressDialog progressDialog;
 
     @Override
@@ -72,35 +70,11 @@ public class DiaryPageActivity extends Fragment implements MyListAdapterListener
             StrictMode.setThreadPolicy(policy);
         }
 
-        //swipeLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_container);
-        //swipeLayout.setBackgroundColor(Color.TRANSPARENT);
-        //swipeLayout.setRefreshing(true);
-        //swipeLayout.setOnRefreshListener(this);
-
         de_list_view = (ListView) view.findViewById(R.id.de_listview);
-
         de_list_view.setClickable(false);
-
-        de_list_view.setOnScrollListener(new AbsListView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(AbsListView absListView, int i) {
-
-            }
-
-            @Override
-            public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                //if (de_list_view.getChildCount() == 0)
-                    //swipeLayout.setEnabled(true);
-                //else if (firstVisibleItem == 0 && visibleItemCount > 0 && de_list_view.getChildAt(0).getTop() >= 0)
-                    //swipeLayout.setEnabled(true);
-                //else
-                    //swipeLayout.setEnabled(false);
-            }
-        });
 
         view.setFocusableInTouchMode(true);
         view.requestFocus();
-
         view.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -138,13 +112,6 @@ public class DiaryPageActivity extends Fragment implements MyListAdapterListener
         }
     }
 
-    public void onRefresh() {
-        //swipeLayout.setRefreshing(true);
-        //de_list_view.setAdapter(null);
-        DiaryEntryFetchTask deft = new DiaryEntryFetchTask();
-        deft.execute();
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle presses on the action bar items
@@ -170,8 +137,6 @@ public class DiaryPageActivity extends Fragment implements MyListAdapterListener
 
     @Override
     public void onDestroy() {
-        //if (de_list_view != null)
-        //    de_list_view.setAdapter(null);
         super.onDestroy();
     }
 
@@ -237,7 +202,7 @@ public class DiaryPageActivity extends Fragment implements MyListAdapterListener
                 JSONObject obj = new JSONObject(responseStr);
 
                 if (obj.getBoolean("result")) {
-                    Toast.makeText(getActivity().getApplicationContext(), "Kayıt silindi: " + params.get(0).getValue(), Toast.LENGTH_LONG).show();
+                    //Toast.makeText(getActivity().getApplicationContext(), "Kayıt silindi: " + params.get(0).getValue(), Toast.LENGTH_LONG).show();
                 }
             }
         } catch (UnsupportedEncodingException e) {
@@ -343,9 +308,6 @@ public class DiaryPageActivity extends Fragment implements MyListAdapterListener
                                 InputStream inputStream = loadFromAWSS3(o.getString("photo_url"), subFolder, s3Client);
                                 //todo: Image not found gibi bir mesaj koymamız gerekiyor.
                                 if (inputStream != null) {
-                                    //byte[] data = IOUtils.toByteArray(inputStream);
-                                    //ByteArrayInputStream bin = new ByteArrayInputStream(data);
-                                    //Bitmap bm = loadFast(bin);
                                     dew.setImage(BitmapFactory.decodeStream(inputStream));
                                     dew.setHasImage(true);
                                 }
@@ -368,9 +330,6 @@ public class DiaryPageActivity extends Fragment implements MyListAdapterListener
                                     InputStream inputStream = loadFromAWSS3(o.getString("photo_url"), subFolder, s3Client);
                                     //todo: Image not found gibi bir mesaj koymamız gerekiyor.
                                     if (inputStream != null) {
-                                        //byte[] data = IOUtils.toByteArray(inputStream);
-                                        //ByteArrayInputStream bin = new ByteArrayInputStream(data);
-                                        //Bitmap bm = loadFast(bin);
                                         dew.setImage(BitmapFactory.decodeStream(inputStream));
                                         dew.setHasImage(true);
                                     }
@@ -378,7 +337,6 @@ public class DiaryPageActivity extends Fragment implements MyListAdapterListener
                                     dew.setImage(null);
                                     dew.setHasImage(false);
                                 }
-
                                 list.add(dew);
                             }
                         }
@@ -398,9 +356,16 @@ public class DiaryPageActivity extends Fragment implements MyListAdapterListener
 
                 S3Object object = s3Client.getObject(new GetObjectRequest(
                         AppUtility.existingBucketName4Thumbnail, subFolder + "medium/" + photoURL));
-                return object.getObjectContent();
+                S3ObjectInputStream objectContent = object.getObjectContent();
+                return objectContent;
 
             } catch (AmazonServiceException ase) {
+                if (ase.getErrorCode().equals("NoSuchKey")) {
+                    S3Object object = s3Client.getObject(new GetObjectRequest(
+                            AppUtility.existingBucketName, subFolder + photoURL));
+                    S3ObjectInputStream objectContent = object.getObjectContent();
+                    return objectContent;
+                }
                 System.out.println("Caught an AmazonServiceException, which " +
                         "means your request made it " +
                         "to Amazon S3, but was rejected with an error response" +

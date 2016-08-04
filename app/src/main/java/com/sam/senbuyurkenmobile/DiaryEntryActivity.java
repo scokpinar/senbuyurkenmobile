@@ -46,7 +46,6 @@ import org.json.JSONObject;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -158,11 +157,7 @@ public class DiaryEntryActivity extends Activity {
                         bitmap.compress(Bitmap.CompressFormat.JPEG, 85, outFile);
                         outFile.flush();
                         outFile.close();
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
                     } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 } catch (Exception e) {
