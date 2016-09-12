@@ -1,14 +1,17 @@
 package com.sam.senbuyurkenmobile;
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
 import android.app.Fragment;
 import android.app.ProgressDialog;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.annotation.Nullable;
@@ -20,9 +23,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.loopj.android.http.AsyncHttpClient;
@@ -44,6 +49,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -57,12 +63,14 @@ public class BabyInfoActivity extends Fragment {
     private String gender;
     private ImageButton maleButton;
     private ImageButton femaleButton;
+    private EditText birthDateField;
+    private EditText birthHourField;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.activity_baby_info, container, false);
 
-        if (android.os.Build.VERSION.SDK_INT > 9) {
+        if (Build.VERSION.SDK_INT > 9) {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
         }
@@ -82,8 +90,9 @@ public class BabyInfoActivity extends Fragment {
             @Override
             public void onClick(View v) {
                 gender = "E";
-                maleButton.setImageDrawable(getResources().getDrawable(R.drawable.baby_boy_selected));
-                femaleButton.setImageDrawable(getResources().getDrawable(R.drawable.baby_girl_not_selected));
+                maleButton.setImageDrawable(getResources().getDrawable(R.drawable.boy_checked));
+                femaleButton.setImageDrawable(getResources().getDrawable(R.drawable.girl));
+
             }
         });
 
@@ -92,8 +101,75 @@ public class BabyInfoActivity extends Fragment {
             @Override
             public void onClick(View v) {
                 gender = "K";
-                femaleButton.setImageDrawable(getResources().getDrawable(R.drawable.baby_girl_selected));
-                maleButton.setImageDrawable(getResources().getDrawable(R.drawable.baby_boy_not_selected));
+                maleButton.setImageDrawable(getResources().getDrawable(R.drawable.boy));
+                femaleButton.setImageDrawable(getResources().getDrawable(R.drawable.girl_checked));
+            }
+        });
+
+        birthDateField = (EditText) view.findViewById(R.id.birthDate);
+        birthDateField.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+                InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+
+                Calendar c = Calendar.getInstance();
+                int year = c.get(Calendar.YEAR);
+                int month = c.get(Calendar.MONTH);
+                int day = c.get(Calendar.DAY_OF_MONTH);
+
+                DatePickerDialog dpd = new DatePickerDialog(getActivity(),
+                        new DatePickerDialog.OnDateSetListener() {
+                            @Override
+                            public void onDateSet(DatePicker view, int y, int m, int d) {
+                                String day = "", month = "";
+                                if (d < 10)
+                                    day = "0" + d;
+                                else
+                                    day = d + "";
+                                if (m + 1 < 10)
+                                    month = "0" + (m + 1);
+                                else
+                                    month = (m + 1) + "";
+                                birthDateField.setText(day + "." + month + "." + y);
+                            }
+                        }, year, month, day);
+                dpd.show();
+            }
+        });
+
+        birthHourField = (EditText) view.findViewById(R.id.birthHour);
+        birthHourField.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+                InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+
+                Calendar c = Calendar.getInstance();
+                int hour = c.get(Calendar.HOUR_OF_DAY);
+                int min = c.get(Calendar.MINUTE);
+
+                TimePickerDialog tpd = new TimePickerDialog(getActivity(),
+                        new TimePickerDialog.OnTimeSetListener() {
+                            @Override
+                            public void onTimeSet(TimePicker view, int h, int m) {
+                                String hour = "", min = "";
+                                if (h < 10)
+                                    hour = "0" + h;
+                                else
+                                    hour = h + "";
+                                if (m < 10)
+                                    min = "0" + min;
+                                else
+                                    min = m + "";
+                                birthHourField.setText(hour + ":" + min);
+                            }
+                        }, hour, min, true);
+                tpd.show();
             }
         });
 
@@ -151,10 +227,10 @@ public class BabyInfoActivity extends Fragment {
         TextView baby_surname = (TextView) activity.findViewById(R.id.baby_surname);
         baby_surname.setTextColor(Color.BLACK);
 
-        TextView birth_Date = (TextView) activity.findViewById(R.id.birthDate);
+        TextView birth_Date = (TextView) activity.findViewById(R.id.baby_birthDate);
         birth_Date.setTextColor(Color.BLACK);
 
-        TextView birth_Hour = (TextView) activity.findViewById(R.id.birthHour);
+        TextView birth_Hour = (TextView) activity.findViewById(R.id.baby_birthHour);
         birth_Hour.setTextColor(Color.BLACK);
 
 
@@ -170,6 +246,7 @@ public class BabyInfoActivity extends Fragment {
         String pediatricianDoctor = ((EditText) activity.findViewById(R.id.pediatricianDoctor)).getText().toString();
 
         RequestParams params = new RequestParams();
+
         if (AppUtility.isNotNull(name) && AppUtility.isNotNull(surname) && AppUtility.isNotNull(gender)
                 && AppUtility.isNotNull(birthDate) && AppUtility.isNotNull(birthHour)) {
             params.put("email", email);
@@ -217,20 +294,25 @@ public class BabyInfoActivity extends Fragment {
         surname.setText(babyInfo.getSurname());
         if (babyInfo.getGender() != null && babyInfo.getGender().equals("E")) {
             gender = "E";
-            maleButton.setImageDrawable(getResources().getDrawable(R.drawable.baby_boy_selected));
+            maleButton.setImageDrawable(getResources().getDrawable(R.drawable.boy_checked));
+            femaleButton.setImageDrawable(getResources().getDrawable(R.drawable.girl));
         }
         if (babyInfo.getGender() != null && babyInfo.getGender().equals("K")) {
             gender = "K";
-            femaleButton.setImageDrawable(getResources().getDrawable(R.drawable.baby_girl_selected));
+            maleButton.setImageDrawable(getResources().getDrawable(R.drawable.boy));
+            femaleButton.setImageDrawable(getResources().getDrawable(R.drawable.girl_checked));
         }
+
         TextView birthDate = ((EditText) view.findViewById(R.id.birthDate));
         birthDate.setText(babyInfo.getBirthDate());
         TextView birthHour = ((EditText) view.findViewById(R.id.birthHour));
         birthHour.setText(babyInfo.getBirthHour());
         TextView birthWeight = ((EditText) view.findViewById(R.id.birthWeight));
-        birthWeight.setText(babyInfo.getBirthWeight().toString());
+        if (babyInfo.getBirthWeight() != 0)
+            birthWeight.setText(babyInfo.getBirthWeight().toString());
         TextView birthLength = ((EditText) view.findViewById(R.id.birthLength));
-        birthLength.setText(babyInfo.getBirthLength().toString());
+        if (babyInfo.getBirthLength() != 0)
+            birthLength.setText(babyInfo.getBirthLength().toString());
         TextView birthPlace = ((EditText) view.findViewById(R.id.birthPlace));
         birthPlace.setText(babyInfo.getBirthPlace());
         TextView hospital = ((EditText) view.findViewById(R.id.hospital));
@@ -241,13 +323,7 @@ public class BabyInfoActivity extends Fragment {
         pediatricianDoctor.setText(babyInfo.getPediatricianDoctor());
     }
 
-    /**
-     * Method that performs RESTful webservice invocations
-     *
-     * @param params
-     */
-
-    public void invokeWS(RequestParams params) {
+    private void invokeWS(RequestParams params) {
         final Context ac = getActivity().getApplicationContext();
 
         AsyncHttpClient client = new AsyncHttpClient();
@@ -287,12 +363,10 @@ public class BabyInfoActivity extends Fragment {
         });
     }
 
-    class BabyInfoFetchTask extends AsyncTask<String, Void, BabyInfoWrapper> {
+
+    private class BabyInfoFetchTask extends AsyncTask<String, Void, BabyInfoWrapper> {
 
         private ProgressDialog progressDialog;
-
-        public BabyInfoFetchTask() {
-        }
 
         @Override
         protected void onPreExecute() {

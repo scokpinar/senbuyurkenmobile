@@ -1,5 +1,6 @@
 package com.sam.senbuyurkenmobile;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -7,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
@@ -15,6 +17,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.Menu;
@@ -46,6 +49,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -61,6 +65,13 @@ public class DiaryEntryActivity extends Activity {
     private static final int MAX_WIDTH = 960;
     private static final int MAX_HEIGHT = 540;
     private static final int MAX_CHAR = 1024;
+
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
+
     ImageView icon_camera;
     ImageView viewImage;
     OutputStream outFile = null;
@@ -69,10 +80,27 @@ public class DiaryEntryActivity extends Activity {
     private TextView char_count;
     private EditText note_area;
 
+    //persmission method.
+    public static void verifyStoragePermissions(Activity activity) {
+        // Check if we have read or write permission
+        int writePermission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        int readPermission = ActivityCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE);
+
+        if (writePermission != PackageManager.PERMISSION_GRANTED || readPermission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    activity,
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+            );
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_diary_entry);
+        verifyStoragePermissions(this);
 
         icon_camera = (ImageView) findViewById(R.id.icon_camera);
         viewImage = (ImageView) findViewById(R.id.imageView);
@@ -191,6 +219,8 @@ public class DiaryEntryActivity extends Activity {
                 //    startActivityForResult(intent, 1);
                 //} else if (options[item].equals("Choose from Gallery")) {
                 if (options[item].equals("Galeri")) {
+
+
                     Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                     startActivityForResult(intent, 2);
                 } else if (options[item].equals("İptal")) {
@@ -240,7 +270,7 @@ public class DiaryEntryActivity extends Activity {
 
                 if (obj.getBoolean("result") && selectedImage != null) {
                     Bitmap bitmap = loadFast(AppUtility.getPathFromUri(getContentResolver(), selectedImage));
-                    File resizedFile = new File(android.os.Environment.getExternalStorageDirectory(), params.get(5).getValue() + ".png");
+                    File resizedFile = new File(android.os.Environment.getExternalStorageDirectory(), params.get(5).getValue());
                     OutputStream fOut;
                     try {
                         fOut = new BufferedOutputStream(new FileOutputStream(resizedFile));
@@ -250,6 +280,7 @@ public class DiaryEntryActivity extends Activity {
                         bitmap.recycle();
 
                     } catch (Exception e) {
+                        System.out.println("e = " + e);
                     }
                     saveToAWSS3(resizedFile, params.get(5).getValue());
                 }
@@ -265,14 +296,24 @@ public class DiaryEntryActivity extends Activity {
         int DESIRED_MAX_SIZE = 1080;
 
         BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
+        //options.inJustDecodeBounds = true;
         options.inSampleSize = 1;
-        options.inJustDecodeBounds = false;
+        //options.inJustDecodeBounds = false;
 
         options.inPreferredConfig = Bitmap.Config.RGB_565;
         options.inDither = true;
 
-        Bitmap decodeFile = BitmapFactory.decodeFile(byteArrayInputStream, options);
+        //Bitmap decodeFile = BitmapFactory.decodeFile(byteArrayInputStream, options);
+        Bitmap decodeFile = null;
+        try {
+            decodeFile = BitmapFactory.decodeStream(getContentResolver().openInputStream(selectedImage), null, options);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        //String fname=new File(getFilesDir(), "test.png").getAbsolutePath();
+
+        //Bitmap bMap = BitmapFactory.decodeFile(fname);
 
         int h = decodeFile.getHeight();
         int w = decodeFile.getWidth();

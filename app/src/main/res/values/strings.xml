@@ -4,6 +4,9 @@
     <string name="app_name">Sen Büyürken</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="web_url">www.senbuyurken.com</string>
+    <string name="google_login">Google ile Giriş Yap</string>
+    <string name="logout">Çıkış</string>
 
 
     <!-- Strings related to RegisterActivity -->
@@ -40,13 +43,14 @@
     <string name="radio_female">Kız</string>
     <string name="baby_name">Adı</string>
     <string name="baby_surname">Soyadı</string>
+    <string name="baby_gender">Cinsiyet</string>
     <string name="birthDate">Doğum Tarihi</string>
     <string name="birthHour">Doğum Saati</string>
     <string name="birthWeight">Doğum Kilosu (gr)</string>
     <string name="birthLength">Doğum Boyu (cm)</string>
     <string name="birthPlace">Doğum Yeri</string>
     <string name="hospital">Hastane</string>
-    <string name="gynecologyDoctor">Doğum Doktoru</string>
+    <string name="gynecologyDoctor">Kadın Doğum Doktoru</string>
     <string name="pediatricianDoctor">Çocuk Doktoru</string>
 
 

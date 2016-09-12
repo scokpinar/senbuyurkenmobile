@@ -8,12 +8,12 @@
     <RelativeLayout
         android:id="@+id/content_frame"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"></RelativeLayout>
+        android:layout_height="match_parent" />
 
     <!-- The navigation drawer -->
     <RelativeLayout
         android:id="@+id/drawerPane"
-        android:layout_width="304dp"
+        android:layout_width="300dp"
         android:layout_height="match_parent"
         android:layout_gravity="start">
 
@@ -36,6 +36,20 @@
                 android:adjustViewBounds="true"
                 android:scaleType="fitXY"
                 android:src="@drawable/ic_profile_bg" />
+
+            <ImageView
+                android:id="@+id/profilePhoto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="false"
+                android:layout_centerHorizontal="true"
+                android:layout_centerInParent="false"
+                android:layout_centerVertical="true"
+                android:adjustViewBounds="false"
+                android:maxHeight="60dp"
+                android:maxWidth="60dp"
+                android:minHeight="60dp"
+                android:minWidth="60dp" />
 
             <TextView
                 android:id="@+id/userName"
@@ -61,6 +75,36 @@
             android:background="#FFFFFF"
             android:choiceMode="singleChoice"
             android:divider="@android:color/transparent" />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true">
+
+            <ImageView
+                android:id="@+id/icon_signout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="false"
+                android:layout_alignParentStart="false"
+                android:layout_centerVertical="true"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="5dp"
+                android:src="@drawable/ic_drawer_logout" />
+
+            <TextView
+                android:id="@+id/text_signout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_toEndOf="@+id/icon_signout"
+                android:text="@string/logout"
+                android:textColor="#000"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </RelativeLayout>
 
     </RelativeLayout>
 

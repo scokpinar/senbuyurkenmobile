@@ -10,26 +10,21 @@ import android.provider.MediaStore;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import hugo.weaving.DebugLog;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  * Created by SametCokpinar on 17/12/14.
@@ -131,6 +126,7 @@ public class AppUtility {
         return uid;
     }
 
+
     @DebugLog
     public static String getGoogleTempToken(Context context, String account) {
         String scope = "audience:server:client_id:" + GOOGLE_APP_ID;
@@ -144,23 +140,24 @@ public class AppUtility {
     }
 
     public static void createAWSTempToken(Context context, String userName, String validUser) {
-        Uri.Builder builder = Uri.parse(AppUtility.APP_URL + "rest/appUtilityRest/getToken").buildUpon();
 
-        HttpPost httpPost = new HttpPost(builder.toString());
-        HttpClient client = new DefaultHttpClient();
+        OkHttpClient client = new OkHttpClient();
+        RequestBody formBody = new FormBody.Builder()
+                .add("userName", userName)
+                .add("validUser", validUser)
+                .add("token", getGoogleTempToken(context, userName))
+                .build();
 
-        List<NameValuePair> params = new ArrayList<NameValuePair>();
-        params.add(new BasicNameValuePair("userName", userName));
-        params.add(new BasicNameValuePair("validUser", validUser));
-        params.add(new BasicNameValuePair("token", getGoogleTempToken(context, userName)));
+        Request request = new Request.Builder()
+                .url(AppUtility.APP_URL + "rest/appUtilityRest/getToken")
+                .post(formBody)
+                .build();
 
         try {
-            httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
-            HttpResponse response = client.execute(httpPost);
+            Response response = client.newCall(request).execute();
+            String responseStr = response.body().string();
 
-            String responseStr = EntityUtils.toString(response.getEntity());
-
-            if (responseStr != null && !responseStr.equals("null") && !responseStr.equals("")) {
+            if (!responseStr.equals("null") && !responseStr.equals("")) {
                 JSONObject obj = new JSONObject(responseStr);
                 JSONObject credentials = obj.getJSONObject("credentials");
                 awsTempToken.setAccessKeyId(credentials.getString("accessKeyId"));
@@ -168,9 +165,8 @@ public class AppUtility {
                 awsTempToken.setSessionToken(credentials.getString("sessionToken"));
                 awsTempToken.setExpiration(credentials.getLong("expiration"));
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
+
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
 

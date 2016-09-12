@@ -15,255 +15,243 @@
         android:id="@+id/baby_info_form"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerInParent="true"
-        android:background="#ffffff">
+        android:layout_alignParentEnd="true"
+        android:layout_centerHorizontal="true"
+        android:background="#ffffff"
+        android:fillViewport="false"
+        android:padding="10dp">
 
         <TableLayout
-            android:layout_width="match_parent"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
+            android:orientation="vertical"
             android:showDividers="none">
-
 
             <TableRow
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_margin="10dp"
-                android:gravity="center_vertical|center_horizontal"
-                android:padding="10dp">
+                android:layout_height="wrap_content"
+
+                android:gravity="center_horizontal"
+                android:paddingBottom="10dp"
+                android:paddingTop="10dp">
 
                 <ImageButton
                     android:id="@+id/gender_male"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:adjustViewBounds="true"
+                    android:layout_weight="1"
                     android:background="@android:color/transparent"
-                    android:cropToPadding="false"
-                    android:elevation="0dp"
-                    android:src="@drawable/baby_boy_not_selected" />
+                    android:src="@drawable/boy" />
 
                 <ImageButton
                     android:id="@+id/gender_female"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:background="@android:color/transparent"
-                    android:src="@drawable/baby_girl_not_selected" />
+                    android:src="@drawable/girl" />
+
+            </TableRow>
+
+            <TableRow android:gravity="center_horizontal">
+
+                <TextView
+                    android:id="@+id/baby_name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/baby_name" />
+
+                <TextView
+                    android:id="@+id/baby_surname"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/baby_surname" />
+            </TableRow>
+
+            <TableRow android:gravity="center_horizontal">
+
+                <EditText
+                    android:id="@+id/name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="text"
+                    android:textSize="@dimen/abc_text_size_small_material" />
+
+                <EditText
+                    android:id="@+id/surname"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="text"
+                    android:textSize="@dimen/abc_text_size_small_material" />
+            </TableRow>
+
+            <TableRow android:gravity="center_horizontal">
+
+                <TextView
+                    android:id="@+id/baby_birthDate"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/birthDate" />
+
+                <TextView
+                    android:id="@+id/baby_birthHour"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/birthHour" />
+            </TableRow>
+
+            <TableRow android:gravity="center_horizontal">
+
+                <EditText
+                    android:id="@+id/birthDate"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:focusableInTouchMode="false"
+                    android:inputType="date"
+                    android:textSize="@dimen/abc_text_size_small_material" />
+
+                <EditText
+                    android:id="@+id/birthHour"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:focusableInTouchMode="false"
+                    android:inputType="textPersonName"
+                    android:textSize="@dimen/abc_text_size_small_material" />
 
             </TableRow>
 
 
-            <TableLayout
-                android:paddingEnd="10dp"
-                android:paddingStart="10dp">
+            <TableRow android:gravity="center_horizontal">
 
-                <TableRow>
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/birthWeight" />
 
-                    <TextView
-                        android:id="@+id/baby_name"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/baby_name"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Small" />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/birthLength" />
+            </TableRow>
 
-                </TableRow>
+            <TableRow android:gravity="center_horizontal">
 
-                <TableRow>
+                <EditText
+                    android:id="@+id/birthWeight"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:digits="0123456789"
+                    android:inputType="numberDecimal"
+                    android:maxLength="4"
+                    android:textSize="@dimen/abc_text_size_small_material" />
 
-                    <EditText
-                        android:id="@+id/name"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:inputType="textPersonName" />
-                </TableRow>
-
-                <TableRow>
-
-                    <TextView
-                        android:id="@+id/baby_surname"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
-                        android:text="@string/baby_surname"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Small" />
-
-                </TableRow>
-
-                <TableRow>
-
-                    <EditText
-                        android:id="@+id/surname"
-                        android:layout_width="fill_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:inputType="textPersonName" />
-                </TableRow>
-
-            </TableLayout>
-
-            <TableLayout
-                android:paddingEnd="10dp"
-                android:paddingStart="10dp">
-
-                <TableRow android:gravity="center_horizontal">
-
-                    <TextView
-                        android:layout_weight="1"
-                        android:text="@string/birthDate"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Small" />
-
-                    <TextView
-                        android:layout_weight="1"
-                        android:text="@string/birthHour"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Small" />
-                </TableRow>
-
-                <TableRow android:gravity="center_horizontal">
-
-                    <EditText
-                        android:id="@+id/birthDate"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight=".5"
-                        android:inputType="date" />
-
-                    <EditText
-                        android:id="@+id/birthHour"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight=".5"
-                        android:inputType="textPersonName" />
-
-                </TableRow>
-
-            </TableLayout>
-
-            <TableLayout
-                android:paddingEnd="10dp"
-                android:paddingStart="10dp">
-
-                <TableRow android:gravity="center_horizontal">
-
-                    <TextView
-                        android:layout_weight="1"
-                        android:text="@string/birthWeight"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Small" />
-
-                    <TextView
-                        android:layout_weight="1"
-                        android:text="@string/birthLength"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Small" />
-                </TableRow>
-
-                <TableRow android:gravity="center_horizontal">
-
-                    <EditText
-                        android:id="@+id/birthWeight"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight=".5"
-
-                        android:inputType="numberSigned" />
-
-                    <EditText
-                        android:id="@+id/birthLength"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight=".5"
-                        android:inputType="numberSigned" />
-                </TableRow>
-
-            </TableLayout>
+                <EditText
+                    android:id="@+id/birthLength"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:digits="0123456789"
+                    android:inputType="numberDecimal"
+                    android:maxLength="2"
+                    android:textSize="@dimen/abc_text_size_small_material" />
+            </TableRow>
 
 
-            <TableLayout
-                android:paddingEnd="10dp"
-                android:paddingStart="10dp">
+            <TableRow android:gravity="center_horizontal">
 
-                <TableRow android:gravity="center_horizontal">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/birthPlace" />
 
-                    <TextView
-                        android:layout_weight="1"
-                        android:text="@string/birthPlace"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Small" />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/hospital" />
 
-                    <TextView
-                        android:layout_weight="1"
-                        android:text="@string/hospital"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Small" />
+            </TableRow>
 
-                </TableRow>
+            <TableRow android:gravity="center_horizontal">
 
-                <TableRow android:gravity="center_horizontal">
+                <EditText
+                    android:id="@+id/birthPlace"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="textPersonName"
+                    android:textSize="@dimen/abc_text_size_small_material" />
 
-                    <EditText
-                        android:id="@+id/birthPlace"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
-                        android:inputType="textPersonName" />
+                <EditText
+                    android:id="@+id/hospital"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="textPersonName"
+                    android:textSize="@dimen/abc_text_size_small_material" />
 
-                    <EditText
-                        android:id="@+id/hospital"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
-                        android:inputType="textPersonName" />
-
-                </TableRow>
-
-            </TableLayout>
+            </TableRow>
 
 
-            <TableLayout
-                android:paddingEnd="10dp"
-                android:paddingStart="10dp">
+            <TableRow android:gravity="center_horizontal">
 
-                <TableRow android:gravity="center_horizontal">
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/gynecologyDoctor" />
 
-                    <TextView
-                        android:layout_weight="1"
-                        android:text="@string/gynecologyDoctor"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Small" />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/pediatricianDoctor" />
 
-                    <TextView
-                        android:layout_weight="1"
-                        android:text="@string/pediatricianDoctor"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Small" />
+            </TableRow>
 
-                </TableRow>
+            <TableRow android:gravity="center_horizontal">
 
-                <TableRow android:gravity="center_horizontal">
+                <EditText
+                    android:id="@+id/gynecologyDoctor"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="textPersonName"
+                    android:textSize="@dimen/abc_text_size_small_material" />
 
-                    <EditText
-                        android:id="@+id/gynecologyDoctor"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
-                        android:inputType="textPersonName" />
+                <EditText
+                    android:id="@+id/pediatricianDoctor"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="textPersonName"
+                    android:textSize="@dimen/abc_text_size_small_material" />
 
-                    <EditText
-                        android:id="@+id/pediatricianDoctor"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="0.5"
-                        android:inputType="textPersonName" />
-
-                </TableRow>
-
-            </TableLayout>
-
+            </TableRow>
 
             <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_margin="10dp">
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingTop="20dp">
 
                 <Button
                     android:id="@+id/babyInfoSaveButton"
                     style="@style/myButtonStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_column="1"
                     android:layout_weight="2"
                     android:background="@drawable/my_rounded_button"
                     android:text="@string/saveButton"

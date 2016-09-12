@@ -2,6 +2,7 @@ package com.sam.senbuyurkenmobile;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
@@ -25,7 +26,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -47,7 +50,6 @@ import com.loopj.android.http.RequestParams;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
@@ -62,14 +64,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import hugo.weaving.DebugLog;
 
 /**
  * Created by SametCokpinar on 08/03/15.
+ *
  */
 public class ParentInfoActivity extends Fragment {
 
@@ -78,13 +81,16 @@ public class ParentInfoActivity extends Fragment {
     private static final int PICK_FROM_FILE = 3;
     private View view;
     private ParentInfoWrapper piw = new ParentInfoWrapper();
-    private ImageView mother_photo;
-    private ImageView father_photo;
+
     private Uri mImageCaptureUri;
     private Uri fImageCaptureUri;
     private File mFile;
     private File fFile;
     private int selectedImageView = 0;
+
+    private ImageView mother_photo;
+    private ImageView father_photo;
+    private EditText wedding_anniversary;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -114,7 +120,44 @@ public class ParentInfoActivity extends Fragment {
             }
         });
 
+        wedding_anniversary = (EditText) view.findViewById(R.id.wedding_anniversary);
+        wedding_anniversary.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+                InputMethodManager imm = (InputMethodManager) v.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+
+                Calendar c = Calendar.getInstance();
+                int year = c.get(Calendar.YEAR);
+                int month = c.get(Calendar.MONTH);
+                int day = c.get(Calendar.DAY_OF_MONTH);
+
+                DatePickerDialog dpd = new DatePickerDialog(getActivity(),
+                        new DatePickerDialog.OnDateSetListener() {
+                            @Override
+                            public void onDateSet(DatePicker view, int y, int m, int d) {
+                                String day, month;
+                                if (d < 10)
+                                    day = "0" + d;
+                                else
+                                    day = d + "";
+                                if (m + 1 < 10)
+                                    month = "0" + (m + 1);
+                                else
+                                    month = (m + 1) + "";
+                                wedding_anniversary.setText(day + "." + month + "." + y);
+                            }
+                        }, year, month, day);
+                dpd.show();
+            }
+        });
+
+
         Button button = (Button) view.findViewById(R.id.parentInfoSaveButton);
+        button.setFocusableInTouchMode(true);
+        button.requestFocus();
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -137,8 +180,6 @@ public class ParentInfoActivity extends Fragment {
         if (savedInstanceState == null) {
             ParentInfoFetchTask pift = new ParentInfoFetchTask();
             pift.execute();
-
-
         }
     }
 
@@ -146,7 +187,6 @@ public class ParentInfoActivity extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
     }
-
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -197,7 +237,6 @@ public class ParentInfoActivity extends Fragment {
                         fImageCaptureUri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
                         Intent intent = new Intent(Intent.ACTION_PICK, fImageCaptureUri);
                         startActivityForResult(intent, PICK_FROM_FILE);
-
 
                     }
 
@@ -302,21 +341,34 @@ public class ParentInfoActivity extends Fragment {
         TextView mother_surname = ((EditText) view.findViewById(R.id.mother_surname));
         mother_surname.setText(piw.getMother_surname());
         ImageView mother_photo = (ImageView) view.findViewById(R.id.mother_photo);
-        mother_photo.setImageBitmap(piw.getMother_photo());
+
+        if (piw.getMother_photo() == null) {
+            Bitmap mother = BitmapFactory.decodeResource(this.getActivity().getApplicationContext().getResources(),
+                    R.drawable.mom);
+            mother_photo.setImageBitmap(mother);
+        } else {
+            mother_photo.setImageBitmap(piw.getMother_photo());
+        }
 
         TextView father_name = ((EditText) view.findViewById(R.id.father_name));
         father_name.setText(piw.getFather_name());
         TextView father_surname = ((EditText) view.findViewById(R.id.father_surname));
         father_surname.setText(piw.getFather_surname());
         ImageView father_photo = (ImageView) view.findViewById(R.id.father_photo);
-        father_photo.setImageBitmap(piw.getFather_photo());
-
+        if (piw.getFather_photo() == null) {
+            Bitmap father = BitmapFactory.decodeResource(this.getActivity().getApplicationContext().getResources(),
+                    R.drawable.dad);
+            father_photo.setImageBitmap(father);
+        } else {
+            father_photo.setImageBitmap(piw.getFather_photo());
+        }
         TextView wedding_anniversary = ((EditText) view.findViewById(R.id.wedding_anniversary));
-        wedding_anniversary.setText(piw.getWedding_anniversary());
 
+        if (piw.getWedding_anniversary() != null && !(piw.getWedding_anniversary().equals("null")))
+            wedding_anniversary.setText(piw.getWedding_anniversary());
     }
 
-    public void saveParentInfo() {
+    private void saveParentInfo() {
         Activity activity = getActivity();
 
         SharedPreferences sp = activity.getApplicationContext().getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
@@ -333,13 +385,13 @@ public class ParentInfoActivity extends Fragment {
         // When Name Edit View, Email Edit View and Password Edit View have values other than Null
         //if (AppUtility.isNotNull(mother_name) && AppUtility.isNotNull(mother_surname)) {
 
-            // Put http parameters
-            params.put("email", email);
-            params.put("mother_name", mother_name);
-            params.put("mother_surname", mother_surname);
-            params.put("father_name", father_name);
-            params.put("father_surname", father_surname);
-            params.put("wedding_anniversary", wedding_anniversary);
+        // Put http parameters
+        params.put("email", email);
+        params.put("mother_name", mother_name);
+        params.put("mother_surname", mother_surname);
+        params.put("father_name", father_name);
+        params.put("father_surname", father_surname);
+        params.put("wedding_anniversary", wedding_anniversary);
         if (mFile != null)
             params.put("mother_photo", mFile.getName());
         else if (piw != null)
@@ -349,7 +401,7 @@ public class ParentInfoActivity extends Fragment {
         else if (piw != null)
             params.put("father_photo", piw.getFather_photo_name());
 
-            invokeSaveParentInfoWS(params);
+        invokeSaveParentInfoWS(params);
 
         //} else {
         //    Toast.makeText(activity.getApplicationContext().getApplicationContext(), "Please fill the fields", Toast.LENGTH_LONG).show();
@@ -357,7 +409,7 @@ public class ParentInfoActivity extends Fragment {
 
     }
 
-    public void invokeSaveParentInfoWS(final RequestParams params) {
+    private void invokeSaveParentInfoWS(final RequestParams params) {
         // Make RESTful webservice call using AsyncHttpClient object
         AsyncHttpClient client = new AsyncHttpClient();
         client.post(AppUtility.APP_URL + "rest/parentRegistrationRest/createParentInfo", params, new AsyncHttpResponseHandler() {
@@ -476,7 +528,7 @@ public class ParentInfoActivity extends Fragment {
         return null;
     }
 
-    public AmazonS3 getAWS3Client(String userName, String validUser) {
+    private AmazonS3 getAWS3Client(String userName, String validUser) {
         AWSTempToken awsTempToken = AppUtility.getAWSTempToken(getActivity().getApplicationContext(), userName, validUser);
         BasicSessionCredentials basicSessionCredentials =
                 new BasicSessionCredentials(awsTempToken.getAccessKeyId(),
@@ -486,12 +538,12 @@ public class ParentInfoActivity extends Fragment {
     }
 
 
-    class ParentInfoFetchTask extends AsyncTask<String, Void, ParentInfoWrapper> {
+    private class ParentInfoFetchTask extends AsyncTask<String, Void, ParentInfoWrapper> {
 
         private ProgressDialog progressDialog;
         private SharedPreferences sp;
 
-        public ParentInfoFetchTask() {
+        ParentInfoFetchTask() {
         }
 
         @Override
@@ -516,7 +568,7 @@ public class ParentInfoActivity extends Fragment {
             return piw;
         }
 
-        public void invokeRestWS(List<NameValuePair> params) {
+        void invokeRestWS(List<NameValuePair> params) {
             Uri.Builder builder = Uri.parse(AppUtility.APP_URL + "rest/parentRegistrationRest/getParentInfo").buildUpon();
 
             HttpPost httpPost = new HttpPost(builder.toString());
@@ -548,37 +600,21 @@ public class ParentInfoActivity extends Fragment {
                             InputStream inputStream = loadFromAWSS3(piw.getMother_photo_name(), subFolder, s3Client);
                             //todo: Image not found gibi bir mesaj koymamız gerekiyor.
                             if (inputStream != null) {
-                                //byte[] data = IOUtils.toByteArray(inputStream);
-                                //ByteArrayInputStream bin = new ByteArrayInputStream(data);
-                                //Bitmap bm = loadFast(bin);
                                 piw.setMother_photo(BitmapFactory.decodeStream(inputStream));
                             }
                         }
-
                         if (piw.getFather_photo_name() != null && !piw.getFather_photo_name().equals("null")) {
                             InputStream inputStream = loadFromAWSS3(piw.getFather_photo_name(), subFolder, s3Client);
                             //todo: Image not found gibi bir mesaj koymamız gerekiyor.
                             if (inputStream != null) {
-                                //byte[] data = IOUtils.toByteArray(inputStream);
-                                //ByteArrayInputStream bin = new ByteArrayInputStream(data);
-                                //Bitmap bm = loadFast(bin);
                                 piw.setFather_photo(BitmapFactory.decodeStream(inputStream));
                             }
                         }
-
                     }
                 }
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            } catch (ClientProtocolException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
+            } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
-
         }
     }
-
 }

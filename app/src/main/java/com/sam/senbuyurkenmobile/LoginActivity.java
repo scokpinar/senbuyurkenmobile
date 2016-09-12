@@ -19,13 +19,18 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.OptionalPendingResult;
 import com.google.android.gms.common.api.ResultCallback;
-import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
-import com.loopj.android.http.SyncHttpClient;
 
-import org.apache.http.Header;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.IOException;
+
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  * Created by SametCokpinar on 25/01/15.
@@ -42,9 +47,9 @@ public class LoginActivity extends AppCompatActivity implements
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login_2);
+        setContentView(R.layout.activity_login);
 
-        findViewById(R.id.sign_in_button_2).setOnClickListener(this);
+        findViewById(R.id.sign_in_button).setOnClickListener(this);
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
@@ -56,7 +61,7 @@ public class LoginActivity extends AppCompatActivity implements
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
 
-        SignInButton signInButton = (SignInButton) findViewById(R.id.sign_in_button_2);
+        SignInButton signInButton = (SignInButton) findViewById(R.id.sign_in_button);
         signInButton.setSize(SignInButton.SIZE_STANDARD);
         signInButton.setScopes(gso.getScopeArray());
     }
@@ -103,17 +108,16 @@ public class LoginActivity extends AppCompatActivity implements
             String email = acct.getEmail();
             GoogleTokenValidationTask task = new GoogleTokenValidationTask();
             task.execute(email);
+            System.out.println("SignIn Result = " + result.toString());
         } else {
-            // Signed out, show unauthenticated UI.
-            //updateUI(false);
+            System.out.println("SignIn Result = " + result.toString());
         }
     }
 
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
-        // An unresolvable error has occurred and Google APIs (including Sign-In) will not
-        // be available.
         Log.d(TAG, "onConnectionFailed:" + connectionResult);
+        System.out.println("connectionResult = " + connectionResult);
     }
 
     private void showProgressDialog() {
@@ -139,7 +143,7 @@ public class LoginActivity extends AppCompatActivity implements
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.sign_in_button_2:
+            case R.id.sign_in_button:
                 signIn();
                 break;
         }
@@ -177,7 +181,7 @@ public class LoginActivity extends AppCompatActivity implements
             RequestParams params = new RequestParams();
             params.put("userName", googleUId);
             params.put("token", googleTempToken);
-            invokeGoogleTokenValidationWS(params);
+            invokeGoogleTokenValidationWS(googleUId, googleTempToken);
             return null;
         }
 
@@ -185,67 +189,78 @@ public class LoginActivity extends AppCompatActivity implements
             navigateToMainActivity();
         }
 
-        public void invokeGoogleTokenValidationWS(RequestParams params) {
-            SyncHttpClient client = new SyncHttpClient();
-            client.post(AppUtility.APP_URL + "rest/appUtilityRest/googleTokenValidation/", params, new JsonHttpResponseHandler() {
+        public void invokeGoogleTokenValidationWS(String googleUId, String googleTempToken) {
 
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+            OkHttpClient client = new OkHttpClient();
+            RequestBody formBody = new FormBody.Builder()
+                    .add("userName", googleUId)
+                    .add("token", googleTempToken)
+                    .build();
+            Request request = new Request.Builder()
+                    .url(AppUtility.APP_URL + "rest/appUtilityRest/googleTokenValidation")
+                    .post(formBody)
+                    .build();
+
+            try {
+                Response response = client.newCall(request).execute();
+
+                String responseStr = response.body().string();
+
+                if (!responseStr.equals("null") && !responseStr.equals("")) {
                     editor = sp.edit();
-                    try {
-                        if (response.getBoolean("result")) {
-                            editor.putBoolean("validUser", true);
-                            editor.putBoolean("userLoggedIn", true);
-                            editor.apply();
+                    JSONObject result = new JSONObject(responseStr);
+                    if (result.getBoolean("result")) {
+                        editor.putBoolean("validUser", true);
+                        editor.putBoolean("userLoggedIn", true);
+                        editor.apply();
 
-                            RequestParams params = new RequestParams();
-                            params.put("userName", sp.getString("userName", ""));
-                            params.put("userType", UserType.FREE.getTypeCode());
-                            params.put("active", "1");
-                            invokeCreateUserWS(params);
-                        }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+                        RequestParams params = new RequestParams();
+                        params.put("userName", sp.getString("userName", ""));
+                        params.put("userType", UserType.FREE.getTypeCode());
+                        params.put("active", "1");
+                        invokeCreateUserWS(sp.getString("userName", ""), UserType.FREE.getTypeCode(), "1");
+
+                    } else {
                         editor.putBoolean("validUser", false);
                         editor.putBoolean("userLoggedIn", false);
                         editor.apply();
                     }
+
                 }
 
-                @Override
-                public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject errorResponse) {
-                    if (statusCode == 404) {
+            } catch (IOException | JSONException e) {
+                e.printStackTrace();
+            }
 
-                    } else if (statusCode == 500) {
-
-                    } else {
-
-                    }
-                }
-            });
         }
 
-        public void invokeCreateUserWS(RequestParams params) {
-            SyncHttpClient client = new SyncHttpClient();
-            client.post(AppUtility.APP_URL + "rest/userRegistrationRest/createUser/", params, new JsonHttpResponseHandler() {
+        public void invokeCreateUserWS(String userName, String userType, String active) {
 
-                @Override
-                public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                    try {
-                        userCreateResult = response.getBoolean("result");
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
+            OkHttpClient client = new OkHttpClient();
+            RequestBody formBody = new FormBody.Builder()
+                    .add("userName", userName)
+                    .add("userType", userType)
+                    .add("active", active)
+                    .build();
+            Request request = new Request.Builder()
+                    .url(AppUtility.APP_URL + "rest/userRegistrationRest/createUser")
+                    .post(formBody)
+                    .build();
+
+            try {
+                Response response = client.newCall(request).execute();
+                String responseStr = response.body().string();
+
+                if (!responseStr.equals("null") && !responseStr.equals("")) {
+                    editor = sp.edit();
+                    JSONObject result = new JSONObject(responseStr);
+                    userCreateResult = result.getBoolean("result");
+                    System.out.println("userCreateResult = " + userCreateResult);
                 }
 
-                @Override
-                public void onFailure(int statusCode, Header[] headers, Throwable e, JSONObject errorResponse) {
-                    if (statusCode == 404) {
-                    } else if (statusCode == 500) {
-                    } else {
-                    }
-                }
-            });
+            } catch (JSONException | IOException e) {
+                e.printStackTrace();
+            }
         }
 
         public Boolean getUserCreateResult() {

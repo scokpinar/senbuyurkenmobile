@@ -6,6 +6,7 @@ import android.app.FragmentTransaction;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.widget.DrawerLayout;
@@ -16,10 +17,16 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.squareup.picasso.Picasso;
+
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
@@ -105,8 +112,28 @@ public class MainActivity extends AppCompatActivity {
         mDrawerList.setAdapter(adapter);
 
         SharedPreferences sp = getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
+
         TextView userName = (TextView) findViewById(R.id.userName);
         userName.setText(sp.getString("userName", null));
+
+        ImageView profilePhoto = (ImageView) findViewById(R.id.profilePhoto);
+        URL url = null;
+        Uri uri = null;
+        try {
+            url = new URL(sp.getString("profilePhotoUrl", null));
+            uri = Uri.parse(url.toURI().toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        Picasso.with(getApplicationContext())
+                .load(uri)
+                .placeholder(android.R.drawable.sym_def_app_icon)
+                .error(android.R.drawable.sym_def_app_icon)
+                .transform(new CircleTransform())
+                .into(profilePhoto);
 
         getSupportActionBar().setHomeButtonEnabled(true);
 

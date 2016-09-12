@@ -25,14 +25,9 @@
             android:value="@integer/google_play_services_version" />
 
         <activity
-            android:name=".LoginActivity"
-            android:configChanges="orientation|keyboardHidden"
-
-            android:label="@string/title_activity_login" />
-
-        <activity
             android:name=".LauncherActivity"
-            android:label="@string/title_activity_launcher">
+            android:configChanges="orientation|keyboardHidden"
+            android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

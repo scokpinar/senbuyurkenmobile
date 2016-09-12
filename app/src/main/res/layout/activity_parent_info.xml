@@ -47,12 +47,11 @@
                     <TableRow>
 
                         <TextView
-                            android:id="@+id/textView3"
+                            android:id="@+id/textView_mother_name"
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
                             android:layout_span="1"
-                            android:text="@string/mother_name"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Small" />
+                            android:text="@string/mother_name" />
 
                     </TableRow>
 
@@ -65,22 +64,27 @@
                             android:id="@+id/mother_name"
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
-                            android:layout_column="0"
-                            android:layout_weight="1"
                             android:width="200dp"
                             android:background="@drawable/my_edittext"
-                            android:gravity="fill_horizontal"
-                            android:inputType="textPersonName" />
+                            android:inputType="text"
+                            android:textSize="@dimen/abc_text_size_small_material" />
+
+                        <TextView
+                            android:id="@+id/textView"
+                            android:layout_width="fill_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_span="1"
+                            android:text="@string/mother_name" />
+
                     </TableRow>
 
                     <TableRow>
 
                         <TextView
-                            android:id="@+id/textView2"
+                            android:id="@+id/textView_mother_surname"
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/mother_surname"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Small" />
+                            android:text="@string/mother_surname" />
 
                     </TableRow>
 
@@ -94,13 +98,14 @@
                             android:layout_height="wrap_content"
                             android:width="200dp"
                             android:background="@drawable/my_edittext"
-                            android:inputType="textPersonName" />
+                            android:inputType="text"
+                            android:textSize="@dimen/abc_text_size_small_material" />
+
                     </TableRow>
 
                 </TableLayout>
 
             </TableRow>
-
 
             <TableRow
                 android:layout_width="match_parent"
@@ -122,11 +127,10 @@
                     <TableRow>
 
                         <TextView
-                            android:id="@+id/textView33"
+                            android:id="@+id/textView_father_name"
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/father_name"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Small" />
+                            android:text="@string/father_name" />
 
                     </TableRow>
 
@@ -140,17 +144,18 @@
                             android:layout_height="wrap_content"
                             android:width="200dp"
                             android:background="@drawable/my_edittext"
-                            android:inputType="textPersonName" />
+                            android:inputType="textPersonName"
+                            android:textSize="@dimen/abc_text_size_small_material" />
+
                     </TableRow>
 
                     <TableRow>
 
                         <TextView
-                            android:id="@+id/textView22"
+                            android:id="@+id/textView_father_surname"
                             android:layout_width="fill_parent"
                             android:layout_height="wrap_content"
-                            android:text="@string/father_surname"
-                            android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Small" />
+                            android:text="@string/father_surname" />
 
                     </TableRow>
 
@@ -164,7 +169,8 @@
                             android:layout_height="wrap_content"
                             android:width="200dp"
                             android:background="@drawable/my_edittext"
-                            android:inputType="textPersonName" />
+                            android:inputType="textPersonName"
+                            android:textSize="@dimen/abc_text_size_small_material" />
                     </TableRow>
 
                 </TableLayout>
@@ -183,11 +189,10 @@
                     android:paddingLeft="20dp">
 
                     <TextView
-                        android:id="@+id/textView222"
+                        android:id="@+id/textView_wedding_anniversary"
                         android:layout_width="fill_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/wedding_anniversary"
-                        android:textAppearance="@style/TextAppearance.AppCompat.Widget.PopupMenu.Small" />
+                        android:text="@string/wedding_anniversary" />
 
                     <EditText
                         android:id="@+id/wedding_anniversary"
@@ -196,11 +201,13 @@
                         android:layout_gravity="center_horizontal"
                         android:width="200dp"
                         android:background="@drawable/my_edittext"
-                        android:inputType="textPersonName" />
+                        android:focusableInTouchMode="false"
+                        android:inputType="date"
+                        android:textSize="@dimen/abc_text_size_small_material" />
+
                 </TableLayout>
 
             </TableRow>
-
 
             <TableRow
                 android:layout_width="wrap_content"
@@ -221,6 +228,5 @@
         </TableLayout>
 
     </ScrollView>
-
 
 </RelativeLayout>
