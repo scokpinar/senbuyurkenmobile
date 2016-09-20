@@ -92,6 +92,7 @@
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="20dp"
                 android:layout_marginTop="5dp"
+                android:onClick="signOut"
                 android:src="@drawable/ic_drawer_logout" />
 
             <TextView
@@ -100,6 +101,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_toEndOf="@+id/icon_signout"
+                android:onClick="signOut"
                 android:text="@string/logout"
                 android:textColor="#000"
                 android:textSize="14sp"

@@ -219,6 +219,12 @@ public class LauncherActivity extends AppCompatActivity implements GoogleApiClie
             case R.id.sign_in_button:
                 signIn();
                 break;
+            case R.id.icon_signout:
+                System.out.println("signout");
+                break;
+            case R.id.text_signout:
+                System.out.println("signout");
+                break;
         }
 
     }

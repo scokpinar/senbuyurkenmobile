@@ -28,6 +28,7 @@
     <string name="register_fail_msg">Kayıt sırasında hata oluştu.</string>
     <string name="register_existinguser_msg">Kullanıcı sistemde kayıtlıdır.</string>
     <string name="delete_message">Kayıt silinecektir. Emin misiniz ?</string>
+    <string name="signout_message">Uygulamadan çıkış yapmak istiyor musunuz ?</string>
     <string name="required_fields">Zorunlu alanları doldurunuz. </string>
 
 
