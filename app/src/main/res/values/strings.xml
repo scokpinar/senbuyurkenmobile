@@ -2,16 +2,17 @@
 <resources>
 
     <string name="app_name">Sen Büyürken</string>
-    <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="web_url">www.senbuyurken.com</string>
     <string name="google_login">Google ile Giriş Yap</string>
     <string name="logout">Çıkış</string>
 
 
-    <!-- Strings related to RegisterActivity -->
+    <!-- Strings related to Alerts -->
+    <string name="no_internet">Lütfen internet bağlantınızı kontrol ediniz.</string>
     <string name="alert_dialog_yes">Evet</string>
     <string name="alert_dialog_no">Hayır</string>
+    <string name="retry">Yeniden Dene</string>
 
     <!-- Strings related to RegisterActivity -->
     <string name="register_header">Yeni Hesap</string>
@@ -92,14 +93,12 @@
 
     <string name="action_example">Example action</string>
 
-
     <string-array name="menu">
         <item>Notlarım</item>
         <item>Bebek Bilgileri</item>
         <item>Ebeveyn Bilgileri</item>
         <item>Hakkında</item>
     </string-array>
-
 
     <string-array name="menu_images">
         <item>ic_drawer_notes</item>
@@ -110,8 +109,5 @@
 
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
-    <string name="action_websearch">Web search</string>
-    <string name="app_not_available">Sorry, there\'s no web browser available</string>
-
 
 </resources>

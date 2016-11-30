@@ -40,14 +40,13 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = "MainActivity";
-
-    DiaryPageActivity fragmentDiaryPage;
-    BabyInfoActivity fragmentBabyInfo;
-    ParentInfoActivity fragmentParentInfo;
-    AppInfoActivity fragmentAppInfo;
-    Fragment[] fragments;
-    String[] fragmentTAGS = new String[]{"fragment_1", "fragment_2", "fragment_3", "fragment_4"};
     ArrayList<NavigationItem> mNavItems = new ArrayList<NavigationItem>();
+    private DiaryPageActivity fragmentDiaryPage;
+    private BabyInfoActivity fragmentBabyInfo;
+    private ParentInfoActivity fragmentParentInfo;
+    private AppInfoActivity fragmentAppInfo;
+    private Fragment[] fragments;
+    private String[] fragmentTAGS = new String[]{"fragment_1", "fragment_2", "fragment_3", "fragment_4"};
     private DrawerLayout mDrawerLayout;
     private RelativeLayout mDrawerPane;
     private ListView mDrawerList;
@@ -100,9 +99,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
                 imm.hideSoftInputFromWindow(drawerView.getWindowToken(), 0);
                 getSupportActionBar().setTitle(drawerTitle);
                 invalidateOptionsMenu();
-
             }
-
         };
 
         mDrawerLayout.setDrawerListener(mDrawerToggle);
@@ -129,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         userName.setText(sp.getString("userName", null));
 
         ImageView profilePhoto = (ImageView) findViewById(R.id.profilePhoto);
-        URL url = null;
+        URL url;
         Uri uri = null;
         try {
             url = new URL(sp.getString("profilePhotoUrl", null));
@@ -240,12 +237,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.O
         AlertDialog dialog = builder.create();
         dialog.show();
 
-
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.d(TAG, "onConnectionFailed:" + connectionResult);
-        System.out.println("connectionResult = " + connectionResult);
     }
 }

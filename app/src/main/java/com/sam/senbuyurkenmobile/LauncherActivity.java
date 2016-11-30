@@ -1,12 +1,14 @@
 package com.sam.senbuyurkenmobile;
 
-import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -40,11 +42,10 @@ import okhttp3.Response;
 
 public class LauncherActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
 
-    private static final String TAG = "SignInActivity";
+    private static final String TAG = "LauncherActivity";
     private static final int RC_SIGN_IN = 9001;
 
     private GoogleApiClient mGoogleApiClient;
-    private ProgressDialog mProgressDialog;
     private SignInButton signInButton;
     private SharedPreferences sp;
     private SharedPreferences.Editor editor;
@@ -86,18 +87,17 @@ public class LauncherActivity extends AppCompatActivity implements GoogleApiClie
         Thread background = new Thread() {
             public void run() {
                 try {
-                    // Thread will sleep for 0.5 seconds
                     sleep(500);
 
-                    boolean userLoggedIn = sp.getBoolean("userLoggedIn", false);
+                    Boolean userLoggedIn = sp.getBoolean("userLoggedIn", false);
                     String userName = sp.getString("userName", "");
                     Boolean validUser = sp.getBoolean("validUser", false);
 
                     if (userLoggedIn) {
+                        signInButton.setVisibility(View.INVISIBLE);
                         Intent i = new Intent(getBaseContext(), MainActivity.class);
                         AppUtility.createAWSTempToken(getApplicationContext(), userName, validUser + "");
                         startActivity(i);
-                        signInButton.setVisibility(View.INVISIBLE);
                     }
                     signInButton.setVisibility(View.VISIBLE);
 
@@ -117,19 +117,10 @@ public class LauncherActivity extends AppCompatActivity implements GoogleApiClie
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
+        return id == R.id.action_settings || super.onOptionsItemSelected(item);
     }
-
 
     protected void onStart() {
         super.onStart();
@@ -144,11 +135,9 @@ public class LauncherActivity extends AppCompatActivity implements GoogleApiClie
             // If the user has not previously signed in on this device or the sign-in has expired,
             // this asynchronous branch will attempt to sign in the user silently.  Cross-device
             // single sign-on will occur in this branch.
-            //showProgressDialog();
             opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
                 @Override
-                public void onResult(GoogleSignInResult googleSignInResult) {
-                    //hideProgressDialog();
+                public void onResult(@NonNull GoogleSignInResult googleSignInResult) {
                     handleSignInResult(googleSignInResult);
                 }
             });
@@ -172,7 +161,7 @@ public class LauncherActivity extends AppCompatActivity implements GoogleApiClie
             GoogleSignInAccount acct = result.getSignInAccount();
             String email = acct.getEmail();
 
-            GoogleTokenValidationTask task = new GoogleTokenValidationTask();
+            GoogleTokenValidationTask task = new GoogleTokenValidationTask(this);
             task.execute(email);
 
             Uri profilePhotoUrl = acct.getPhotoUrl();
@@ -190,22 +179,6 @@ public class LauncherActivity extends AppCompatActivity implements GoogleApiClie
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
         Log.d(TAG, "onConnectionFailed:" + connectionResult);
-        System.out.println("connectionResult = " + connectionResult);
-    }
-
-    private void showProgressDialog() {
-        if (mProgressDialog == null) {
-            mProgressDialog = new ProgressDialog(this);
-            mProgressDialog.setMessage("Loading");
-            mProgressDialog.setIndeterminate(true);
-        }
-        mProgressDialog.show();
-    }
-
-    private void hideProgressDialog() {
-        if (mProgressDialog != null && mProgressDialog.isShowing()) {
-            mProgressDialog.hide();
-        }
     }
 
     private void signIn() {
@@ -220,10 +193,10 @@ public class LauncherActivity extends AppCompatActivity implements GoogleApiClie
                 signIn();
                 break;
             case R.id.icon_signout:
-                System.out.println("signout");
+                System.out.println("sign out");
                 break;
             case R.id.text_signout:
-                System.out.println("signout");
+                System.out.println("sign out");
                 break;
         }
 
@@ -235,40 +208,57 @@ public class LauncherActivity extends AppCompatActivity implements GoogleApiClie
         startActivity(intent);
     }
 
-
-    private class GoogleTokenValidationTask extends AsyncTask<String, Void, String> {
-
+    private class GoogleTokenValidationTask extends AsyncTask<String, Void, Boolean> {
         Boolean userCreateResult = false;
         String googleUId;
         String googleTempToken;
+        Context context;
 
-        public GoogleTokenValidationTask() {
+        GoogleTokenValidationTask(Context context) {
+            this.context = context;
             sp = getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
         }
 
-        protected String doInBackground(String... strings) {
+        protected Boolean doInBackground(String... strings) {
             String account = strings[0];
 
-            editor = sp.edit();
-            googleUId = AppUtility.getGoogleUId(LauncherActivity.this, account);
-            googleTempToken = AppUtility.getGoogleTempToken(LauncherActivity.this, account);
+            if (AppUtility.hasActiveNetwork(context) && AppUtility.hasInternetConnection()) {
+                editor = sp.edit();
+                googleUId = AppUtility.getGoogleUId(LauncherActivity.this, account);
+                googleTempToken = AppUtility.getGoogleTempToken(LauncherActivity.this, account);
 
-            editor.putString("userId", googleUId);
-            editor.putString("userName", account);
-            editor.apply();
+                editor.putString("userId", googleUId);
+                editor.putString("userName", account);
+                editor.apply();
 
-            RequestParams params = new RequestParams();
-            params.put("userName", googleUId);
-            params.put("token", googleTempToken);
-            invokeGoogleTokenValidationWS(googleUId, googleTempToken);
-            return null;
+                RequestParams params = new RequestParams();
+                params.put("userName", googleUId);
+                params.put("token", googleTempToken);
+                invokeGoogleTokenValidationWS(googleUId, googleTempToken);
+                return true;
+            } else {
+                return false;
+            }
+
         }
 
-        protected void onPostExecute(String result) {
-            navigateToMainActivity();
+        protected void onPostExecute(Boolean result) {
+            if (result)
+                navigateToMainActivity();
+            else {
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                builder.setMessage(R.string.no_internet);
+                builder.setCancelable(false);
+                builder.setPositiveButton(R.string.retry, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        LauncherActivity.this.recreate();
+                    }
+                });
+                builder.show();
+            }
         }
 
-        public void invokeGoogleTokenValidationWS(String googleUId, String googleTempToken) {
+        void invokeGoogleTokenValidationWS(String googleUId, String googleTempToken) {
 
             OkHttpClient client = new OkHttpClient();
             RequestBody formBody = new FormBody.Builder()
@@ -298,13 +288,11 @@ public class LauncherActivity extends AppCompatActivity implements GoogleApiClie
                         params.put("userType", UserType.FREE.getTypeCode());
                         params.put("active", "1");
                         invokeCreateUserWS(sp.getString("userName", ""), UserType.FREE.getTypeCode(), "1");
-
                     } else {
                         editor.putBoolean("validUser", false);
                         editor.putBoolean("userLoggedIn", false);
                         editor.apply();
                     }
-
                 }
 
             } catch (IOException | JSONException e) {
@@ -313,7 +301,7 @@ public class LauncherActivity extends AppCompatActivity implements GoogleApiClie
 
         }
 
-        public void invokeCreateUserWS(String userName, String userType, String active) {
+        void invokeCreateUserWS(String userName, String userType, String active) {
 
             OkHttpClient client = new OkHttpClient();
             RequestBody formBody = new FormBody.Builder()
@@ -331,7 +319,6 @@ public class LauncherActivity extends AppCompatActivity implements GoogleApiClie
                 String responseStr = response.body().string();
 
                 if (!responseStr.equals("null") && !responseStr.equals("")) {
-                    editor = sp.edit();
                     JSONObject result = new JSONObject(responseStr);
                     userCreateResult = result.getBoolean("result");
                     System.out.println("userCreateResult = " + userCreateResult);
@@ -340,14 +327,6 @@ public class LauncherActivity extends AppCompatActivity implements GoogleApiClie
             } catch (JSONException | IOException e) {
                 e.printStackTrace();
             }
-        }
-
-        public Boolean getUserCreateResult() {
-            return userCreateResult;
-        }
-
-        public void setUserCreateResult(Boolean userCreateResult) {
-            this.userCreateResult = userCreateResult;
         }
 
     }

@@ -49,21 +49,26 @@ public class LoginActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        findViewById(R.id.sign_in_button).setOnClickListener(this);
+        if (AppUtility.hasActiveNetwork(this) && AppUtility.hasInternetConnection()) {
 
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .requestIdToken(AppUtility.GOOGLE_APP_ID)
-                .build();
+            findViewById(R.id.sign_in_button).setOnClickListener(this);
 
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this, this)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
+            GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestEmail()
+                    .requestIdToken(AppUtility.GOOGLE_APP_ID)
+                    .build();
 
-        SignInButton signInButton = (SignInButton) findViewById(R.id.sign_in_button);
-        signInButton.setSize(SignInButton.SIZE_STANDARD);
-        signInButton.setScopes(gso.getScopeArray());
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .enableAutoManage(this, this)
+                    .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                    .build();
+
+            SignInButton signInButton = (SignInButton) findViewById(R.id.sign_in_button);
+            signInButton.setSize(SignInButton.SIZE_STANDARD);
+            signInButton.setScopes(gso.getScopeArray());
+        } else {
+            System.out.println("+ No Internet Connection");
+        }
     }
 
     protected void onStart() {
@@ -144,7 +149,11 @@ public class LoginActivity extends AppCompatActivity implements
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.sign_in_button:
-                signIn();
+                if (AppUtility.hasActiveNetwork(this) && AppUtility.hasInternetConnection()) {
+                    signIn();
+                } else {
+                    System.out.println("No Internet Connection");
+                }
                 break;
         }
     }

@@ -34,6 +34,7 @@
                 android:layout_height="match_parent"
                 android:layout_alignParentEnd="false"
                 android:adjustViewBounds="true"
+                android:alpha="10"
                 android:scaleType="fitXY"
                 android:src="@drawable/ic_profile_bg" />
 
@@ -45,11 +46,12 @@
                 android:layout_centerHorizontal="true"
                 android:layout_centerInParent="false"
                 android:layout_centerVertical="true"
+                android:layout_marginBottom="5dp"
                 android:adjustViewBounds="false"
-                android:maxHeight="60dp"
-                android:maxWidth="60dp"
-                android:minHeight="60dp"
-                android:minWidth="60dp" />
+                android:maxHeight="65dp"
+                android:maxWidth="65dp"
+                android:minHeight="65dp"
+                android:minWidth="65dp" />
 
             <TextView
                 android:id="@+id/userName"
@@ -97,7 +99,7 @@
 
             <TextView
                 android:id="@+id/text_signout"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_toEndOf="@+id/icon_signout"

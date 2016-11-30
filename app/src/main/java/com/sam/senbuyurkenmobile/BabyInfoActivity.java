@@ -6,6 +6,7 @@ import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
@@ -33,7 +34,6 @@ import android.widget.Toast;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
-import com.loopj.android.http.ResponseHandlerInterface;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -79,7 +79,19 @@ public class BabyInfoActivity extends Fragment {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                saveBabyInfo();
+                if (AppUtility.hasActiveNetwork(getActivity()) && AppUtility.hasInternetConnection()) {
+                    saveBabyInfo();
+                } else {
+                    android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(getActivity());
+                    builder.setMessage(R.string.no_internet);
+                    builder.setCancelable(false);
+                    builder.setPositiveButton(R.string.retry, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                        }
+                    });
+                    builder.show();
+                }
+
             }
         });
 
@@ -263,6 +275,7 @@ public class BabyInfoActivity extends Fragment {
             params.put("pediatrician_doctor", pediatricianDoctor);
 
             invokeWS(params);
+
         } else {
             InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
@@ -325,16 +338,19 @@ public class BabyInfoActivity extends Fragment {
 
     private void invokeWS(RequestParams params) {
         final Context ac = getActivity().getApplicationContext();
-
+        final ProgressDialog[] progressDialog = new ProgressDialog[1];
         AsyncHttpClient client = new AsyncHttpClient();
         client.post(AppUtility.APP_URL + "rest/babyRegistrationRest/createBabyInfo", params, new AsyncHttpResponseHandler() {
 
             @Override
-            public void onPreProcessResponse(ResponseHandlerInterface instance, HttpResponse response) {
+            public void onStart() {
+                progressDialog[0] = ProgressDialog.show(getActivity(), null, null, true, false);
+                progressDialog[0].setContentView(R.layout.progress_layout);
             }
 
             @Override
             public void onSuccess(int statusCode, Header[] headers, byte[] response) {
+                progressDialog[0].dismiss();
                 try {
                     JSONObject obj = new JSONObject(new String(response));
                     if (obj.getBoolean("result")) {
@@ -352,6 +368,7 @@ public class BabyInfoActivity extends Fragment {
 
             @Override
             public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                progressDialog[0].dismiss();
                 if (statusCode == 404) {
                     Toast.makeText(ac, ac.getString(R.string.register_fail_msg), Toast.LENGTH_LONG).show();
                 } else if (statusCode == 500) {

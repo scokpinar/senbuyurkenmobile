@@ -72,7 +72,6 @@ import hugo.weaving.DebugLog;
 
 /**
  * Created by SametCokpinar on 08/03/15.
- *
  */
 public class ParentInfoActivity extends Fragment {
 
@@ -91,6 +90,8 @@ public class ParentInfoActivity extends Fragment {
     private ImageView mother_photo;
     private ImageView father_photo;
     private EditText wedding_anniversary;
+
+    private AmazonS3Client s3Client;
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -161,7 +162,18 @@ public class ParentInfoActivity extends Fragment {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                saveParentInfo();
+                if (AppUtility.hasActiveNetwork(getActivity()) && AppUtility.hasInternetConnection()) {
+                    saveParentInfo();
+                } else {
+                    android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(getActivity());
+                    builder.setMessage(R.string.no_internet);
+                    builder.setCancelable(false);
+                    builder.setPositiveButton(R.string.retry, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                        }
+                    });
+                    builder.show();
+                }
             }
         });
 
@@ -201,51 +213,6 @@ public class ParentInfoActivity extends Fragment {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-    }
-
-    private void selectImage(final int selectedImageView) {
-
-        //final CharSequence[] options = {"Fotoğraf Çek", "Galeri", "İptal"};
-        final CharSequence[] options = {"Galeri", "İptal"};
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle("Fotoğraf Seç");
-        builder.setItems(options, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int item) {
-                /*if (options[item].equals("Fotoğraf Çek")) {
-                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                    File f = new File(android.os.Environment.getExternalStorageDirectory(), "temp.jpg");
-                    if (selectedImageView == 1) {
-                        mImageCaptureUri = Uri.fromFile(f);
-                        intent.putExtra(MediaStore.EXTRA_OUTPUT, mImageCaptureUri);
-                    } else if (selectedImageView == 2) {
-                        fImageCaptureUri = Uri.fromFile(f);
-                        intent.putExtra(MediaStore.EXTRA_OUTPUT, fImageCaptureUri);
-
-                    }
-                    startActivityForResult(intent, PICK_FROM_CAMERA);
-                } else*/
-                if (options[item].equals("Galeri")) {
-
-                    if (selectedImageView == 1) {
-                        mImageCaptureUri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-                        Intent intent = new Intent(Intent.ACTION_PICK, mImageCaptureUri);
-                        startActivityForResult(intent, PICK_FROM_FILE);
-
-                    } else if (selectedImageView == 2) {
-                        fImageCaptureUri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-                        Intent intent = new Intent(Intent.ACTION_PICK, fImageCaptureUri);
-                        startActivityForResult(intent, PICK_FROM_FILE);
-
-                    }
-
-                } else if (options[item].equals("İptal")) {
-                    dialog.dismiss();
-                }
-            }
-        });
-        builder.show();
     }
 
     @Override
@@ -293,7 +260,6 @@ public class ParentInfoActivity extends Fragment {
                         mother_photo.setImageBitmap(photo);
                         mFile = file;
 
-
                     } else if (selectedImageView == 2) {
                         father_photo.setImageBitmap(photo);
                         fFile = file;
@@ -301,6 +267,50 @@ public class ParentInfoActivity extends Fragment {
                 }
                 break;
         }
+    }
+
+    private void selectImage(final int selectedImageView) {
+        //final CharSequence[] options = {"Kamera", "Galeri", "İptal"};
+        final CharSequence[] options = {"Galeri", "İptal"};
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle("Fotoğraf Seç");
+        builder.setItems(options, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int item) {
+                /*if (options[item].equals("Fotoğraf Çek")) {
+                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    File f = new File(android.os.Environment.getExternalStorageDirectory(), "temp.jpg");
+                    if (selectedImageView == 1) {
+                        mImageCaptureUri = Uri.fromFile(f);
+                        intent.putExtra(MediaStore.EXTRA_OUTPUT, mImageCaptureUri);
+                    } else if (selectedImageView == 2) {
+                        fImageCaptureUri = Uri.fromFile(f);
+                        intent.putExtra(MediaStore.EXTRA_OUTPUT, fImageCaptureUri);
+
+                    }
+                    startActivityForResult(intent, PICK_FROM_CAMERA);
+                } else*/
+                if (options[item].equals("Galeri")) {
+
+                    if (selectedImageView == 1) {
+                        mImageCaptureUri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                        Intent intent = new Intent(Intent.ACTION_PICK, mImageCaptureUri);
+                        startActivityForResult(intent, PICK_FROM_FILE);
+
+                    } else if (selectedImageView == 2) {
+                        fImageCaptureUri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                        Intent intent = new Intent(Intent.ACTION_PICK, fImageCaptureUri);
+                        startActivityForResult(intent, PICK_FROM_FILE);
+
+                    }
+
+                } else if (options[item].equals("İptal")) {
+                    dialog.dismiss();
+                }
+            }
+        });
+        builder.show();
     }
 
     private void doCrop(int selectedImageView) {
@@ -319,7 +329,6 @@ public class ParentInfoActivity extends Fragment {
             else if (selectedImageView == 2)
                 intent.setData(fImageCaptureUri);
 
-
             intent.putExtra("aspectX", 1);
             intent.putExtra("aspectY", 1);
             intent.putExtra("crop", "true");
@@ -332,6 +341,139 @@ public class ParentInfoActivity extends Fragment {
                 startActivityForResult(i, CROP_FROM_CAMERA);
             }
         }
+    }
+
+    private void saveParentInfo() {
+        Activity activity = getActivity();
+
+        SharedPreferences sp = activity.getApplicationContext().getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
+        String email = sp.getString("userName", null);
+
+        String mother_name = ((EditText) activity.findViewById(R.id.mother_name)).getText().toString();
+        String mother_surname = ((EditText) activity.findViewById(R.id.mother_surname)).getText().toString();
+        String father_name = ((EditText) activity.findViewById(R.id.father_name)).getText().toString();
+        String father_surname = ((EditText) activity.findViewById(R.id.father_surname)).getText().toString();
+        String wedding_anniversary = ((EditText) activity.findViewById(R.id.wedding_anniversary)).getText().toString();
+
+        RequestParams params = new RequestParams();
+
+        params.put("email", email);
+        params.put("mother_name", mother_name);
+        params.put("mother_surname", mother_surname);
+        params.put("father_name", father_name);
+        params.put("father_surname", father_surname);
+        params.put("wedding_anniversary", wedding_anniversary);
+        if (mFile != null)
+            params.put("mother_photo", mFile.getName());
+        else if (piw != null)
+            params.put("mother_photo", piw.getMother_photo_name());
+        if (fFile != null)
+            params.put("father_photo", fFile.getName());
+        else if (piw != null)
+            params.put("father_photo", piw.getFather_photo_name());
+
+        invokeSaveParentInfoWS(params);
+    }
+
+    private void invokeSaveParentInfoWS(final RequestParams params) {
+        final ProgressDialog[] progressDialog = new ProgressDialog[1];
+
+
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.post(AppUtility.APP_URL + "rest/parentRegistrationRest/createParentInfo", params, new AsyncHttpResponseHandler() {
+
+            @Override
+            public void onStart() {
+                progressDialog[0] = ProgressDialog.show(getActivity(), null, null, true, false);
+                progressDialog[0].setContentView(R.layout.progress_layout);
+            }
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] response) {
+                progressDialog[0].dismiss();
+                try {
+                    // JSON Object
+                    JSONObject obj = new JSONObject(new String(response));
+                    // When the JSON response has status boolean value assigned with true
+                    if (obj.getBoolean("result")) {
+                        if (mFile != null)
+                            saveToAWSS3(mFile, mFile.getName());
+                        if (fFile != null)
+                            saveToAWSS3(fFile, fFile.getName());
+
+                        Toast.makeText(getView().getContext().getApplicationContext(), getView().getContext().getApplicationContext().getString(R.string.register_success_msg), Toast.LENGTH_LONG).show();
+
+                    } else {
+                        Toast.makeText(getView().getContext().getApplicationContext(), getView().getContext().getApplicationContext().getString(R.string.register_existinguser_msg), Toast.LENGTH_LONG).show();
+                    }
+                } catch (JSONException e) {
+                    Toast.makeText(getView().getContext().getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
+                    e.printStackTrace();
+                }
+            }
+
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                progressDialog[0].dismiss();
+                // When Http response code is '404'
+                if (statusCode == 404) {
+                    Toast.makeText(getView().getContext().getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
+                }
+                // When Http response code is '500'
+                else if (statusCode == 500) {
+                    Toast.makeText(getView().getContext().getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
+                }
+                // When Http response code other than 404, 500
+                else {
+                    Toast.makeText(getView().getContext().getApplicationContext(), "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet or remote server is not up and running]", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+    }
+
+    @DebugLog
+    private void saveToAWSS3(File image, String fileName) {
+        SharedPreferences sp = getActivity().getApplicationContext().getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
+        String subFolderOriginal = sp.getString("userId", "") + "/";
+
+        try {
+            System.out.println("Uploading a new object to S3 from a file\n");
+
+            PutObjectRequest por4Original = new PutObjectRequest(
+                    AppUtility.existingBucketName, subFolderOriginal + fileName, image);
+
+            por4Original.setCannedAcl(CannedAccessControlList.AuthenticatedRead);
+            s3Client.putObject(por4Original);
+
+        } catch (AmazonServiceException ase) {
+            System.out.println("Caught an AmazonServiceException, which " +
+                    "means your request made it " +
+                    "to Amazon S3, but was rejected with an error response" +
+                    " for some reason.");
+            System.out.println("Error Message:    " + ase.getMessage());
+            System.out.println("HTTP Status Code: " + ase.getStatusCode());
+            System.out.println("AWS Error Code:   " + ase.getErrorCode());
+            System.out.println("Error Type:       " + ase.getErrorType());
+            System.out.println("Request ID:       " + ase.getRequestId());
+        } catch (AmazonClientException ace) {
+            System.out.println("Caught an AmazonClientException, which " +
+                    "means the client encountered " +
+                    "an internal error while trying to " +
+                    "communicate with S3, " +
+                    "such as not being able to access the network.");
+            System.out.println("Error Message: " + ace.getMessage());
+        }
+    }
+
+
+    private AmazonS3Client getAWS3Client(String userName, String validUser) {
+        AWSTempToken awsTempToken = AppUtility.getAWSTempToken(getActivity().getApplicationContext(), userName, validUser);
+        BasicSessionCredentials basicSessionCredentials =
+                new BasicSessionCredentials(awsTempToken.getAccessKeyId(),
+                        awsTempToken.getSecretAccessKey(),
+                        awsTempToken.getSessionToken());
+        return new AmazonS3Client(basicSessionCredentials);
     }
 
     public void setParentInfoData() {
@@ -368,136 +510,6 @@ public class ParentInfoActivity extends Fragment {
             wedding_anniversary.setText(piw.getWedding_anniversary());
     }
 
-    private void saveParentInfo() {
-        Activity activity = getActivity();
-
-        SharedPreferences sp = activity.getApplicationContext().getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
-        String email = sp.getString("userName", null);
-
-        String mother_name = ((EditText) activity.findViewById(R.id.mother_name)).getText().toString();
-        String mother_surname = ((EditText) activity.findViewById(R.id.mother_surname)).getText().toString();
-        String father_name = ((EditText) activity.findViewById(R.id.father_name)).getText().toString();
-        String father_surname = ((EditText) activity.findViewById(R.id.father_surname)).getText().toString();
-        String wedding_anniversary = ((EditText) activity.findViewById(R.id.wedding_anniversary)).getText().toString();
-
-        // Instantiate Http Request Param Object
-        RequestParams params = new RequestParams();
-        // When Name Edit View, Email Edit View and Password Edit View have values other than Null
-        //if (AppUtility.isNotNull(mother_name) && AppUtility.isNotNull(mother_surname)) {
-
-        // Put http parameters
-        params.put("email", email);
-        params.put("mother_name", mother_name);
-        params.put("mother_surname", mother_surname);
-        params.put("father_name", father_name);
-        params.put("father_surname", father_surname);
-        params.put("wedding_anniversary", wedding_anniversary);
-        if (mFile != null)
-            params.put("mother_photo", mFile.getName());
-        else if (piw != null)
-            params.put("mother_photo", piw.getMother_photo_name());
-        if (fFile != null)
-            params.put("father_photo", fFile.getName());
-        else if (piw != null)
-            params.put("father_photo", piw.getFather_photo_name());
-
-        invokeSaveParentInfoWS(params);
-
-        //} else {
-        //    Toast.makeText(activity.getApplicationContext().getApplicationContext(), "Please fill the fields", Toast.LENGTH_LONG).show();
-        //}
-
-    }
-
-    private void invokeSaveParentInfoWS(final RequestParams params) {
-        // Make RESTful webservice call using AsyncHttpClient object
-        AsyncHttpClient client = new AsyncHttpClient();
-        client.post(AppUtility.APP_URL + "rest/parentRegistrationRest/createParentInfo", params, new AsyncHttpResponseHandler() {
-            // When the response returned by REST has Http response code '200'
-
-
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, byte[] response) {
-                try {
-                    // JSON Object
-                    JSONObject obj = new JSONObject(new String(response));
-                    // When the JSON response has status boolean value assigned with true
-                    if (obj.getBoolean("result")) {
-                        if (mFile != null)
-                            saveToAWSS3(mFile, mFile.getName());
-                        if (fFile != null)
-                            saveToAWSS3(fFile, fFile.getName());
-
-                        Toast.makeText(getView().getContext().getApplicationContext(), getView().getContext().getApplicationContext().getString(R.string.register_success_msg), Toast.LENGTH_LONG).show();
-
-                    } else {
-                        Toast.makeText(getView().getContext().getApplicationContext(), getView().getContext().getApplicationContext().getString(R.string.register_existinguser_msg), Toast.LENGTH_LONG).show();
-                    }
-                } catch (JSONException e) {
-                    // TODO Auto-generated catch block
-                    Toast.makeText(getView().getContext().getApplicationContext(), "Error Occured [Server's JSON response might be invalid]!", Toast.LENGTH_LONG).show();
-                    e.printStackTrace();
-
-                }
-            }
-
-
-            @Override
-            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
-
-                // When Http response code is '404'
-                if (statusCode == 404) {
-                    Toast.makeText(getView().getContext().getApplicationContext(), "Requested resource not found", Toast.LENGTH_LONG).show();
-                }
-                // When Http response code is '500'
-                else if (statusCode == 500) {
-                    Toast.makeText(getView().getContext().getApplicationContext(), "Something went wrong at server end", Toast.LENGTH_LONG).show();
-                }
-                // When Http response code other than 404, 500
-                else {
-                    Toast.makeText(getView().getContext().getApplicationContext(), "Unexpected Error occcured! [Most common Error: Device might not be connected to Internet or remote server is not up and running]", Toast.LENGTH_LONG).show();
-                }
-            }
-        });
-    }
-
-    @DebugLog
-    private void saveToAWSS3(File image, String fileName) {
-        SharedPreferences sp = getActivity().getApplicationContext().getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
-
-        String subFolderOriginal = sp.getString("userId", "") + "/";
-
-        AmazonS3 s3Client = getAWS3Client(sp.getString("userName", null), (sp.getBoolean("validUser", false) + ""));
-
-        try {
-            System.out.println("Uploading a new object to S3 from a file\n");
-
-            PutObjectRequest por4Original = new PutObjectRequest(
-                    AppUtility.existingBucketName, subFolderOriginal + fileName, image);
-
-            por4Original.setCannedAcl(CannedAccessControlList.AuthenticatedRead);
-            s3Client.putObject(por4Original);
-
-        } catch (AmazonServiceException ase) {
-            System.out.println("Caught an AmazonServiceException, which " +
-                    "means your request made it " +
-                    "to Amazon S3, but was rejected with an error response" +
-                    " for some reason.");
-            System.out.println("Error Message:    " + ase.getMessage());
-            System.out.println("HTTP Status Code: " + ase.getStatusCode());
-            System.out.println("AWS Error Code:   " + ase.getErrorCode());
-            System.out.println("Error Type:       " + ase.getErrorType());
-            System.out.println("Request ID:       " + ase.getRequestId());
-        } catch (AmazonClientException ace) {
-            System.out.println("Caught an AmazonClientException, which " +
-                    "means the client encountered " +
-                    "an internal error while trying to " +
-                    "communicate with S3, " +
-                    "such as not being able to access the network.");
-            System.out.println("Error Message: " + ace.getMessage());
-        }
-    }
-
     @DebugLog
     private InputStream loadFromAWSS3(String photoURL, String subFolder, AmazonS3 s3Client) {
         try {
@@ -527,16 +539,6 @@ public class ParentInfoActivity extends Fragment {
         }
         return null;
     }
-
-    private AmazonS3 getAWS3Client(String userName, String validUser) {
-        AWSTempToken awsTempToken = AppUtility.getAWSTempToken(getActivity().getApplicationContext(), userName, validUser);
-        BasicSessionCredentials basicSessionCredentials =
-                new BasicSessionCredentials(awsTempToken.getAccessKeyId(),
-                        awsTempToken.getSecretAccessKey(),
-                        awsTempToken.getSessionToken());
-        return new AmazonS3Client(basicSessionCredentials);
-    }
-
 
     private class ParentInfoFetchTask extends AsyncTask<String, Void, ParentInfoWrapper> {
 
@@ -575,8 +577,7 @@ public class ParentInfoActivity extends Fragment {
             HttpClient client = new DefaultHttpClient();
 
             String subFolder = sp.getString("userId", "") + "/";
-            AmazonS3 s3Client = getAWS3Client(sp.getString("userName", null), (sp.getBoolean("validUser", false) + ""));
-
+            s3Client = getAWS3Client(sp.getString("userName", null), (sp.getBoolean("validUser", false) + ""));
 
             try {
                 httpPost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));

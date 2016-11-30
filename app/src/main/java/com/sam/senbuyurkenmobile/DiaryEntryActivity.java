@@ -121,7 +121,6 @@ public class DiaryEntryActivity extends Activity {
             }
 
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-
                 char_count.setText(String.valueOf(MAX_CHAR - s.length()));
             }
 
@@ -130,7 +129,6 @@ public class DiaryEntryActivity extends Activity {
         };
 
         note_area.addTextChangedListener(txtWatcher);
-
 
     }
 
@@ -247,9 +245,20 @@ public class DiaryEntryActivity extends Activity {
         params.add(new BasicNameValuePair("timeZone", Calendar.getInstance().getTimeZone().getID()));
         if (selectedImage != null)
             params.add(new BasicNameValuePair("photoURL", String.valueOf(System.currentTimeMillis()) + ".jpg"));
-        new SaveTask().execute(params);
-    }
 
+        if (AppUtility.hasActiveNetwork(this) && AppUtility.hasInternetConnection()) {
+            new SaveTask().execute(params);
+        } else {
+            android.support.v7.app.AlertDialog.Builder builder = new android.support.v7.app.AlertDialog.Builder(this);
+            builder.setMessage(R.string.no_internet);
+            builder.setCancelable(false);
+            builder.setPositiveButton(R.string.retry, new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                }
+            });
+            builder.show();
+        }
+    }
 
     @DebugLog
     public void invokeWS(List<NameValuePair> params) {
@@ -285,9 +294,7 @@ public class DiaryEntryActivity extends Activity {
                     saveToAWSS3(resizedFile, params.get(5).getValue());
                 }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (JSONException e) {
+        } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
     }

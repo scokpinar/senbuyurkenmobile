@@ -184,8 +184,7 @@ public class DiaryPageActivity extends Fragment implements MyListAdapterListener
         dialog.show();
     }
 
-
-    public void invokeDeleteWS(List<NameValuePair> params) {
+    private void invokeDeleteWS(List<NameValuePair> params) {
 
         Uri.Builder builder = Uri.parse(AppUtility.APP_URL + "rest/diaryEntryRest/deleteDiaryEntry").buildUpon();
 
@@ -232,12 +231,8 @@ public class DiaryPageActivity extends Fragment implements MyListAdapterListener
 
         @Override
         protected void onPreExecute() {
-            //if (swipeLayout != null)
-                //swipeLayout.setRefreshing(true);
-            //else
-                progressDialog = ProgressDialog.show(getActivity(), null, null, true, false);
+            progressDialog = ProgressDialog.show(getActivity(), null, null, true, false);
             progressDialog.setContentView(R.layout.progress_layout);
-
         }
 
         @Override
@@ -248,8 +243,6 @@ public class DiaryPageActivity extends Fragment implements MyListAdapterListener
             de_list_view.setAdapter(adapter);
             if (progressDialog != null)
                 progressDialog.dismiss();
-            //if (swipeLayout != null)
-            //    swipeLayout.setRefreshing(false);
         }
 
         protected List<DiaryEntryWrapper> doInBackground(String... urls) {
@@ -275,6 +268,8 @@ public class DiaryPageActivity extends Fragment implements MyListAdapterListener
 
             SharedPreferences sp = getActivity().getApplicationContext().getSharedPreferences("UserInfo", Context.MODE_PRIVATE);
             String subFolder = sp.getString("userId", "") + "/";
+
+            System.out.println("Play Store Check --> subFolder = " + subFolder);
 
             AmazonS3 s3Client = getAWS3Client(params.get(0).getValue(), params.get(2).getValue());
 

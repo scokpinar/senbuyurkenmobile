@@ -4,6 +4,8 @@ import android.accounts.Account;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.provider.MediaStore;
 
@@ -14,6 +16,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.regex.Matcher;
@@ -43,8 +47,9 @@ public class AppUtility {
     private static Pattern pattern;
     private static Matcher matcher;
 
+
     private static AWSTempToken awsTempToken = new AWSTempToken();
-    ;
+
 
     /**
      * Validate Email with regular expression
@@ -139,7 +144,7 @@ public class AppUtility {
         return token;
     }
 
-    public static void createAWSTempToken(Context context, String userName, String validUser) {
+    static void createAWSTempToken(Context context, String userName, String validUser) {
 
         OkHttpClient client = new OkHttpClient();
         RequestBody formBody = new FormBody.Builder()
@@ -172,6 +177,27 @@ public class AppUtility {
 
     }
 
+    static boolean hasActiveNetwork(Context mContext) {
+        ConnectivityManager cm =
+                (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
+    }
+
+    static boolean hasInternetConnection() {
+        try {
+            URL url = new URL("http://ws.senbuyurken.com");
+            HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+            httpURLConnection.setConnectTimeout(3000);
+            httpURLConnection.connect();
+            if (httpURLConnection.getResponseCode() == 200) {
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }
 
 
